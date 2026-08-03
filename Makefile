@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 LDFLAGS = -lcjson
+DEBUGFLAGS = -g
 PREFIX = /usr/local
 TARGET = npkg
 
@@ -11,7 +12,7 @@ NPKG_BUILD     = /var/cache/npkg/build
 all:
 	$(CC) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
 
-.PHONY: clean install uninstall
+.PHONY: clean install uninstall debug
 
 clean:
 	rm -f $(TARGET)
@@ -31,3 +32,7 @@ install: $(TARGET)
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(TARGET)
+
+debug:
+	$(CC) $(DEBUGFLAGS) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
+
