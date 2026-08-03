@@ -72,11 +72,7 @@ int package_remove(char *package_name)
             fprintf(stderr, "=> Failed to remove %s\n", path);
             return 1;
         }
-        else
-        {
-            printf("  removed %s\n", path);
-        }
-
+        printf("  removed %s\n", path);
     }
 
     cJSON_Delete(package_json);
