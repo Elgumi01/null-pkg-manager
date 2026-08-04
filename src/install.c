@@ -10,6 +10,8 @@
 #define COMMAND_MAX 1024
 #define PATH_MAX 1024
 
+#define MAX_CHAIN_DEPTH 32
+
 int run_commands(cJSON *array)
 {
     cJSON *command = {0};
@@ -88,14 +90,12 @@ int write_manifest(char *package_name, char *version, cJSON *files)
     return 0;
 }
 
-int package_install(char *package_name)
-{
-    if (geteuid() != 0)
-    {
-        fprintf(stderr, "npkg: this command must be run as root\n");
-        return 1;
-    }
+/* dependencies handling */
 
+int install_recursive(char *package_name, char **chain, int depth);
+
+int is_installed(char *package_name)
+{
     char installed_package_path[PATH_MAX + 16] = {0};
     snprintf(installed_package_path,
              sizeof(installed_package_path),
@@ -103,11 +103,62 @@ int package_install(char *package_name)
              INSTALLED_DIR, package_name);
 
     struct stat st;
-    if (stat(installed_package_path, &st) == 0)
+    return stat(installed_package_path, &st) == 0;
+}
+
+int in_chain(char **chain, int depth, char *package_name)
+{
+    for (int i = 0; i < depth; i++)
     {
-        printf("npkg: package '%s' already installed\n", package_name);
-        return 0;
+        if (strcmp(chain[i], package_name) == 0) return 1;
     }
+
+    return 0;
+}
+
+int install_dependencies(cJSON *dependencies, char **chain, int depth)
+{
+    cJSON *dependency = {0};
+
+    cJSON_ArrayForEach(dependency, dependencies)
+    {
+        char *dep_name = cJSON_GetStringValue(dependency);
+
+        if (is_installed(dep_name))
+        {
+            continue;
+        }
+
+        printf("'%s' requires '%s', installing it first...\n", chain[depth - 1], dep_name);
+
+        /* no fprintf because we handle it on the function */
+        if (install_recursive(dep_name, chain, depth) != 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/* install */
+
+int install_recursive(char *package_name, char **chain, int depth)
+{
+
+    if (depth >= MAX_CHAIN_DEPTH)
+    {
+        fprintf(stderr, "npkg: dependency chain too deep (possible cycle with '%s')\n", package_name);
+        return 1;
+    }
+
+    if (in_chain(chain, depth, package_name))
+    {
+        fprintf(stderr, "npkg: circular dependency detected: '%s' depends on itself\n", package_name);
+        return 1;
+    }
+
+    chain[depth] = package_name;
 
     char original_cwd[512] = {0};
     if (!getcwd(original_cwd, sizeof(original_cwd))) {
@@ -122,6 +173,7 @@ int package_install(char *package_name)
              sizeof(package_path),
              "%s%s.json", PACKAGES_JSON, package_name);
 
+    struct stat st;
     if (stat(package_path, &st) != 0)
     {
         fprintf(stderr, "npkg: package '%s' not found in %s\n", package_name, PACKAGES_JSON);
@@ -152,6 +204,12 @@ int package_install(char *package_name)
     if (!package_json)
     {
         fprintf(stderr, "=> Failed to parse %s (%s)\n", package_path, cJSON_GetErrorPtr());
+        return 1;
+    }
+
+    if (install_dependencies(cJSON_GetObjectItem(package_json, "dependencies"), chain, depth + 1) != 0)
+    {
+        cJSON_Delete(package_json);
         return 1;
     }
 
@@ -237,4 +295,17 @@ int package_install(char *package_name)
     printf("=> '%s' installed successfully.\n", package_name);
 
     return 0;
+}
+
+int package_install(char *package_name)
+{
+    if (geteuid() != 0)
+    {
+        fprintf(stderr, "npkg: this command must be run as root\n");
+        return 1;
+    }
+
+    char *chain[MAX_CHAIN_DEPTH] = {0};
+
+    return install_recursive(package_name, chain, 0);
 }

@@ -2,6 +2,7 @@
   "name": "fastfetch",
   "description": "A maintained, feature-rich and performance oriented, neofetch like system information tool.",
   "version": "2.36.0",
+  "dependencies": [],
   "download": [
     "git clone --depth 1 https://github.com/fastfetch-cli/fastfetch"
   ],
