@@ -158,6 +158,12 @@ int install_recursive(char *package_name, char **chain, int depth)
         return 1;
     }
 
+    if (is_installed(package_name))
+    {
+        printf("npkg: '%s' already installed\n", package_name);
+        return 0;
+    }
+
     chain[depth] = package_name;
 
     char original_cwd[512] = {0};
