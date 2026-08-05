@@ -12,8 +12,5 @@
   ],
   "install": [
     "cmake --install fastfetch/build"
-  ],
-  "files": [
-    "/usr/local/bin/fastfetch"
   ]
 }
