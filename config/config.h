@@ -2,7 +2,8 @@
 #define CONFIG_H
 
 #define PACKAGES_JSON  "/etc/npkg/packages/"      /* Here come all the packages.json */
+#define MAKE_CONF      "/etc/npkg/make.conf"      /* .conf file for npkg compilling */
 #define INSTALLED_DIR  "/var/lib/npkg/installed/" /* One manifest per installed package, <name>.json */
-#define BUILD_DIR      "/var/cache/npkg/build/"
+#define BUILD_DIR      "/var/cache/npkg/build/"   /* Directory to use DESTDIR  */
 
 #endif
