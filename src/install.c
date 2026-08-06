@@ -368,7 +368,7 @@ static int install_recursive(char *package_name, char **chain, int depth)
         return 1;
     }
 
-    printf("=> Entering build dir (%s)...\n", BUILD_DIR);
+    STATUS("entering build dir (%s)...\n", BUILD_DIR);
 
     if (mkdir(BUILD_DIR, 0755) != 0 && errno != EEXIST)
     {
@@ -450,7 +450,7 @@ static int install_recursive(char *package_name, char **chain, int depth)
         return 1;
     }
 
-    printf("=> Writing manifest...\n");
+    STATUS("writing manifest...\n");
 
     char *version = cJSON_GetStringValue(cJSON_GetObjectItem(package_json, "version"));
     write_manifest(package_name, version, installed_files);
@@ -517,7 +517,7 @@ static int set_env(char *make_conf_path)
 
         if (setenv(key, value, 1) == -1)
         {
-            ERR("npkg: failed to set %s\n", key);
+            ERR("failed to set %s\n", key);
             fclose(f_make_conf);
             return 1;
         }
@@ -532,14 +532,14 @@ int package_install(char *package_name)
 {
     if (geteuid() != 0)
     {
-        ERR("npkg: this command must be run as root\n");
+        ERR("this command must be run as root\n");
         return 1;
     }
     struct stat st;
     if (stat(MAKE_CONF, &st) == 0)
     {
         if (set_env(MAKE_CONF) != 0) 
-            ERR("npkg: failed to set make.conf");
+            ERR("failed to set make.conf");
     }
     char *chain[MAX_CHAIN_DEPTH] = {0};
 
