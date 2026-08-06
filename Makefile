@@ -5,15 +5,25 @@ DEBUGFLAGS = -g
 PREFIX = /usr/local
 TARGET = npkg
 
+# NOTE: these must match the compile-time path macros in config/config.h
+# changing one without other will make the installed binaries and
+# directories/files be at different places.
+
 NPKG_PACKAGES  = /etc/npkg/packages
 NPKG_INSTALLED = /var/lib/npkg/installed
 NPKG_BUILD     = /var/cache/npkg/build
 MAKE_CONF      = /etc/npkg/make.conf
 
-all:
+.PHONY: all debug clean install uninstall
+
+all: $(TARGET)
+
+$(TARGET):
 	$(CC) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
 
-.PHONY: clean install uninstall debug
+debug:
+	$(CC) $(DEBUGFLAGS) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
+
 
 clean:
 	rm -f $(TARGET)
@@ -25,7 +35,12 @@ install: $(TARGET)
 	install -d -m 755 $(NPKG_PACKAGES)
 	install -d -m 755 $(NPKG_INSTALLED)
 	install -d -m 755 $(NPKG_BUILD)
-	install -m 644 config/make.conf $(MAKE_CONF)
+
+	# root owned, world-readable/non-writable, KEY=VALUE
+	# are runned as root, by npkg, so a writable-by-others
+	# is a straight path to root privileges.
+
+	install -o root -g root 644 config/make.conf $(MAKE_CONF)
 
 	for f in packages/*.json; do \
 		dest=$(NPKG_PACKAGES)/$$(basename $$f); \
@@ -34,7 +49,7 @@ install: $(TARGET)
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(TARGET)
-
-debug:
-	$(CC) $(DEBUGFLAGS) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
+	# Intentionally leaves $(NPKG_PACKAGES), $(NPKG_INSTALLED),
+	# $(NPKG_BUILD) and $(MAKE_CONF) in place. Removing the npkg binary
+	# shouldn't take installed packages or user configuration with it
 
