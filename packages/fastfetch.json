@@ -8,7 +8,7 @@
   ],
   "build": [
     "cmake -S fastfetch -B fastfetch/build",
-    "cmake --build fastfetch/build -j4"
+    "cmake --build fastfetch/build -- $MAKEOPTS"
   ],
   "install": [
     "cmake --install fastfetch/build"
