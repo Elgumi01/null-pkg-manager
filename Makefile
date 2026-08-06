@@ -8,6 +8,7 @@ TARGET = npkg
 NPKG_PACKAGES  = /etc/npkg/packages
 NPKG_INSTALLED = /var/lib/npkg/installed
 NPKG_BUILD     = /var/cache/npkg/build
+MAKE_CONF      = /etc/npkg/make.conf
 
 all:
 	$(CC) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
@@ -24,6 +25,7 @@ install: $(TARGET)
 	install -d -m 755 $(NPKG_PACKAGES)
 	install -d -m 755 $(NPKG_INSTALLED)
 	install -d -m 755 $(NPKG_BUILD)
+	install -m 644 config/make.conf $(MAKE_CONF)
 
 	for f in packages/*.json; do \
 		dest=$(NPKG_PACKAGES)/$$(basename $$f); \
