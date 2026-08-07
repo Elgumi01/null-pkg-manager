@@ -40,7 +40,7 @@ install: $(TARGET)
 	# are runned as root, by npkg, so a writable-by-others
 	# is a straight path to root privileges.
 
-	install -o root -g root 644 config/make.conf $(MAKE_CONF)
+	install -o root -g root -m 644 config/make.conf $(MAKE_CONF)
 
 	for f in packages/*.json; do \
 		dest=$(NPKG_PACKAGES)/$$(basename $$f); \
