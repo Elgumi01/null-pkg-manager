@@ -1,0 +1,21 @@
+{
+    "name": "libxv",
+    "description": "X Window System video extension library, providing client-side bindings for the Xv video overlay extension used by video playback applications.",
+    "version": "1.0.13",
+    "dependencies": [
+        "libxext",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXv-1.0.13.tar.xz",
+        "tar -xf libXv-1.0.13.tar.xz"
+    ],
+    "build": [
+        "cd libXv-1.0.13 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXv-1.0.13",
+        "cd libXv-1.0.13 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXv-1.0.13 && make install"
+    ]
+}

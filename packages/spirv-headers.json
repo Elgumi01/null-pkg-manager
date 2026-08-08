@@ -1,0 +1,19 @@
+{
+  "name": "spirv-headers",
+  "description": "Headers that allow applications to use the SPIR-V language and instruction set with Vulkan.",
+  "version": "1.4.341.0",
+  "dependencies": [
+    "cmake",
+    "ninja"
+  ],
+  "download": [
+    "curl -LO https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.341.0/SPIRV-Headers-vulkan-sdk-1.4.341.0.tar.gz",
+    "tar -xf SPIRV-Headers-vulkan-sdk-1.4.341.0.tar.gz"
+  ],
+  "build": [
+    "cd SPIRV-Headers-vulkan-sdk-1.4.341.0 && mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=/usr -G Ninja .. && ninja $MAKEOPTS"
+  ],
+  "install": [
+    "cd SPIRV-Headers-vulkan-sdk-1.4.341.0/build && DESTDIR=$DESTDIR ninja install"
+  ]
+}

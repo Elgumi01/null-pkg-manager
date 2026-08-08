@@ -1,0 +1,20 @@
+{
+    "name": "libxrender",
+    "description": "X Render extension client library, providing the client-side API for the X Rendering Extension used for anti-aliased 2D rendering.",
+    "version": "0.9.12",
+    "dependencies": [
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXrender-0.9.12.tar.xz",
+        "tar -xf libXrender-0.9.12.tar.xz"
+    ],
+    "build": [
+        "cd libXrender-0.9.12 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXrender-0.9.12",
+        "cd libXrender-0.9.12 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXrender-0.9.12 && make install"
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "name": "libxscrnsaver",
+    "description": "X11 Screen Saver extension client library, used by applications to query and control the X server's screen saver state.",
+    "version": "1.2.5",
+    "dependencies": [
+        "libx11",
+        "libxext",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXScrnSaver-1.2.5.tar.xz",
+        "tar -xf libXScrnSaver-1.2.5.tar.xz"
+    ],
+    "build": [
+        "cd libXScrnSaver-1.2.5 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXScrnSaver-1.2.5",
+        "cd libXScrnSaver-1.2.5 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXScrnSaver-1.2.5 && make install"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "name": "libxaw",
+    "description": "X Athena Widgets Library, a classic X Toolkit-based widget set providing buttons, menus, scrollbars, and other common UI elements.",
+    "version": "1.0.16",
+    "dependencies": [
+        "libxmu",
+        "libxt",
+        "libxpm",
+        "libxext",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXaw-1.0.16.tar.xz",
+        "tar -xf libXaw-1.0.16.tar.xz"
+    ],
+    "build": [
+        "cd libXaw-1.0.16 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXaw-1.0.16",
+        "cd libXaw-1.0.16 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXaw-1.0.16 && make install"
+    ]
+}

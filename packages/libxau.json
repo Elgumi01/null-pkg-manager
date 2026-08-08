@@ -1,0 +1,19 @@
+{
+    "name": "libxau",
+    "description": "X11 Authorization Protocol library, used for restricting client access to the display.",
+    "version": "1.0.12",
+    "dependencies": [
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXau-1.0.12.tar.xz",
+        "tar -xf libXau-1.0.12.tar.xz"
+    ],
+    "build": [
+        "cd libXau-1.0.12 && ./configure $XORG_CONFIG",
+        "cd libXau-1.0.12 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXau-1.0.12 && make install"
+    ]
+}

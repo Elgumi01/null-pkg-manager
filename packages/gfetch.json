@@ -1,0 +1,15 @@
+{
+    "name": "gfetch",
+    "description": "A minimalist system information fetch tool written in C.",
+    "version": "0.1.0",
+    "dependencies": [],
+    "download": [
+        "git clone --depth 1 https://github.com/Elgumi01/gfetch"
+    ],
+    "build": [
+        "cd gfetch && make"
+    ],
+    "install": [
+        "cd gfetch && make install"
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "name": "libxpm",
+    "description": "X PixMap library for handling XPM image files.",
+    "version": "3.5.19",
+    "dependencies": [
+        "xorgproto",
+        "libx11",
+        "libxext"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXpm-3.5.19.tar.xz",
+        "tar -xf libXpm-3.5.19.tar.xz"
+    ],
+    "build": [
+        "cd libXpm-3.5.19 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXpm-3.5.19 --disable-open-zfile",
+        "cd libXpm-3.5.19 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXpm-3.5.19 && make install"
+    ]
+}

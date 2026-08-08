@@ -1,0 +1,21 @@
+{
+    "name": "libxcomposite",
+    "description": "X Composite extension client library, allowing windows to be rendered off-screen and composited together, used by compositing window managers.",
+    "version": "0.4.7",
+    "dependencies": [
+        "libx11",
+        "libxfixes",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXcomposite-0.4.7.tar.xz",
+        "tar -xf libXcomposite-0.4.7.tar.xz"
+    ],
+    "build": [
+        "cd libXcomposite-0.4.7 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXcomposite-0.4.7",
+        "cd libXcomposite-0.4.7 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXcomposite-0.4.7 && make install"
+    ]
+}

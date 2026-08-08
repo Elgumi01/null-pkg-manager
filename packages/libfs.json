@@ -1,0 +1,21 @@
+{
+    "name": "libfs",
+    "description": "Library interface to the X Font Server (xfs), allowing clients to query fonts served over the network font protocol.",
+    "version": "1.0.10",
+    "dependencies": [
+        "libx11",
+        "xtrans",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libFS-1.0.10.tar.xz",
+        "tar -xf libFS-1.0.10.tar.xz"
+    ],
+    "build": [
+        "cd libFS-1.0.10 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libFS-1.0.10",
+        "cd libFS-1.0.10 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libFS-1.0.10 && make install"
+    ]
+}

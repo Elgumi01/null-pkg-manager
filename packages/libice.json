@@ -1,0 +1,20 @@
+{
+    "name": "libice",
+    "description": "X Inter-Client Exchange Library, providing a general-purpose, network-transparent inter-process communication protocol used by libSM and X session management.",
+    "version": "1.1.2",
+    "dependencies": [
+        "xorgproto",
+        "xtrans"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libICE-1.1.2.tar.xz",
+        "tar -xf libICE-1.1.2.tar.xz"
+    ],
+    "build": [
+        "cd libICE-1.1.2 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libICE-1.1.2",
+        "cd libICE-1.1.2 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libICE-1.1.2 && make install"
+    ]
+}

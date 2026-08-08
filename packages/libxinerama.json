@@ -1,0 +1,21 @@
+{
+    "name": "libxinerama",
+    "description": "Xinerama extension library, providing support for multi-monitor setups treated as a single logical display.",
+    "version": "1.1.6",
+    "dependencies": [
+        "libxext",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXinerama-1.1.6.tar.xz",
+        "tar -xf libXinerama-1.1.6.tar.xz"
+    ],
+    "build": [
+        "cd libXinerama-1.1.6 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXinerama-1.1.6",
+        "cd libXinerama-1.1.6 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXinerama-1.1.6 && make install"
+    ]
+}

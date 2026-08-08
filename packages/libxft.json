@@ -1,0 +1,22 @@
+{
+    "name": "libxft",
+    "description": "X FreeType interface library, providing client-side font rendering via FreeType and Fontconfig for X11 applications.",
+    "version": "2.3.9",
+    "dependencies": [
+        "libxrender",
+        "libx11",
+        "xorgproto",
+        "fontconfig"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXft-2.3.9.tar.xz",
+        "tar -xf libXft-2.3.9.tar.xz"
+    ],
+    "build": [
+        "cd libXft-2.3.9 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXft-2.3.9",
+        "cd libXft-2.3.9 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXft-2.3.9 && make install"
+    ]
+}

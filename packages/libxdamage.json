@@ -1,0 +1,21 @@
+{
+    "name": "libxdamage",
+    "description": "X Damage extension library, providing client-side bindings used to track rectangular regions of a window that have changed, useful for compositing.",
+    "version": "1.1.7",
+    "dependencies": [
+        "libxfixes",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXdamage-1.1.7.tar.xz",
+        "tar -xf libXdamage-1.1.7.tar.xz"
+    ],
+    "build": [
+        "cd libXdamage-1.1.7 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXdamage-1.1.7",
+        "cd libXdamage-1.1.7 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXdamage-1.1.7 && make install"
+    ]
+}

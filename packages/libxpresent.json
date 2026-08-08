@@ -1,0 +1,23 @@
+{
+    "name": "libxpresent",
+    "description": "Library interface to the X Present Extension, providing precise frame-timing control for presenting rendered content, used by compositors and DRI3.",
+    "version": "1.0.2",
+    "dependencies": [
+        "libxext",
+        "libxfixes",
+        "libxrandr",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXpresent-1.0.2.tar.xz",
+        "tar -xf libXpresent-1.0.2.tar.xz"
+    ],
+    "build": [
+        "cd libXpresent-1.0.2 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXpresent-1.0.2",
+        "cd libXpresent-1.0.2 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXpresent-1.0.2 && make install"
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "name": "libxtst",
+    "description": "Xtst extension library, providing client-side support for recording and synthetically replaying input device events, used by testing and remote-control tools.",
+    "version": "1.2.5",
+    "dependencies": [
+        "libxext",
+        "libx11",
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libXtst-1.2.5.tar.xz",
+        "tar -xf libXtst-1.2.5.tar.xz"
+    ],
+    "build": [
+        "cd libXtst-1.2.5 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXtst-1.2.5",
+        "cd libXtst-1.2.5 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libXtst-1.2.5 && make install"
+    ]
+}

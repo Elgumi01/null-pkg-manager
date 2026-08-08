@@ -1,0 +1,19 @@
+{
+    "name": "libxshmfence",
+    "description": "Library that exposes an event API on top of Linux futexes, used for synchronizing shared-memory buffer access between the X server and clients (e.g. DRI3).",
+    "version": "1.3.3",
+    "dependencies": [
+        "xorgproto"
+    ],
+    "download": [
+        "curl -LO https://www.x.org/pub/individual/lib/libxshmfence-1.3.3.tar.xz",
+        "tar -xf libxshmfence-1.3.3.tar.xz"
+    ],
+    "build": [
+        "cd libxshmfence-1.3.3 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libxshmfence-1.3.3",
+        "cd libxshmfence-1.3.3 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd libxshmfence-1.3.3 && make install"
+    ]
+}
