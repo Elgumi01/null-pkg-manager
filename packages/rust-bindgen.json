@@ -1,0 +1,21 @@
+{
+  "name": "rust-bindgen",
+  "description": "A utility that generates Rust bindings from C/C++ headers.",
+  "version": "0.72.1",
+  "dependencies": [
+    "rustc"
+  ],
+  "download": [
+    "curl -LO https://github.com/rust-lang/rust-bindgen/archive/refs/tags/v0.72.1/rust-bindgen-0.72.1.tar.gz",
+    "tar -xf rust-bindgen-0.72.1.tar.gz"
+  ],
+  "build": [
+    "cd rust-bindgen-0.72.1 && cargo build --release"
+  ],
+  "install": [
+    "cd rust-bindgen-0.72.1 && install -Dm755 target/release/bindgen $DESTDIR/usr/bin/bindgen",
+    "cd rust-bindgen-0.72.1 && mkdir -p $DESTDIR/usr/share/bash-completion/completions $DESTDIR/usr/share/zsh/site-functions",
+    "cd rust-bindgen-0.72.1 && target/release/bindgen --generate-shell-completions bash > $DESTDIR/usr/share/bash-completion/completions/bindgen",
+    "cd rust-bindgen-0.72.1 && target/release/bindgen --generate-shell-completions zsh > $DESTDIR/usr/share/zsh/site-functions/_bindgen"
+  ]
+}

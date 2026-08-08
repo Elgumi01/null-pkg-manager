@@ -1,0 +1,17 @@
+{
+    "name": "xcb-proto",
+    "description": "XML-XCB protocol descriptions used by libxcb to generate protocol code and API.",
+    "version": "1.17.0",
+    "dependencies": [],
+    "download": [
+        "curl -LO https://xorg.freedesktop.org/archive/individual/proto/xcb-proto-1.17.0.tar.xz",
+        "tar -xf xcb-proto-1.17.0.tar.xz"
+    ],
+    "build": [
+        "cd xcb-proto-1.17.0 && PYTHON=python3 ./configure $XORG_CONFIG",
+        "cd xcb-proto-1.17.0 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd xcb-proto-1.17.0 && make install"
+    ]
+}

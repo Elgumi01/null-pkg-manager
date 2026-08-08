@@ -1,0 +1,16 @@
+{
+  "name": "libyaml",
+  "description": "A C library for parsing and emitting YAML code.",
+  "version": "0.2.5",
+  "dependencies": [],
+  "download": [
+    "curl -LO https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz",
+    "tar -xf yaml-0.2.5.tar.gz"
+  ],
+  "build": [
+    "cd yaml-0.2.5 && ./configure --prefix=/usr --disable-static && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd yaml-0.2.5 && DESTDIR=$DESTDIR make install"
+  ]
+}

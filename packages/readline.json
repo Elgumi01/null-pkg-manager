@@ -1,0 +1,19 @@
+{
+    "name": "readline",
+    "description": "GNU Readline library, providing command-line editing and history recall used by bash and many other interactive programs.",
+    "version": "8.3",
+    "dependencies": [
+        "ncurses"
+    ],
+    "download": [
+        "curl -LO https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
+        "tar -xf readline-8.3.tar.gz"
+    ],
+    "build": [
+        "cd readline-8.3 && ./configure --prefix=/usr --disable-static --with-curses",
+        "cd readline-8.3 && make SHLIB_LIBS=\"-lncursesw\" $MAKEOPTS"
+    ],
+    "install": [
+        "cd readline-8.3 && make DESTDIR=$DESTDIR install"
+    ]
+}

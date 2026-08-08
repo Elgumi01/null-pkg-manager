@@ -1,0 +1,19 @@
+{
+  "name": "pyyaml",
+  "description": "A Python module that implements a YAML parser and emitter.",
+  "version": "6.0.3",
+  "dependencies": [
+    "cython",
+    "libyaml"
+  ],
+  "download": [
+    "curl -LO https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.3.tar.gz",
+    "tar -xf pyyaml-6.0.3.tar.gz"
+  ],
+  "build": [
+    "cd pyyaml-6.0.3 && pip3 wheel -w dist --no-build-isolation --no-deps --no-cache-dir $PWD"
+  ],
+  "install": [
+    "cd pyyaml-6.0.3 && pip3 install --break-system-packages --no-index --find-links dist --no-user PyYAML"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+    "name": "eudev",
+    "description": "Standalone dynamic and persistent device naming daemon (userspace devfs), a systemd-independent fork of udev that manages /dev device nodes and hotplug events.",
+    "version": "3.2.14",
+    "dependencies": [
+        "gperf",
+        "kmod"
+    ],
+    "download": [
+        "curl -LO https://github.com/eudev-project/eudev/releases/download/v3.2.14/eudev-3.2.14.tar.gz",
+        "tar -xf eudev-3.2.14.tar.gz"
+    ],
+    "build": [
+        "cd eudev-3.2.14 && ./configure --prefix=/usr --sysconfdir=/etc --bindir=/usr/sbin --enable-manpages --disable-static",
+        "cd eudev-3.2.14 && make $MAKEOPTS"
+    ],
+    "install": [
+        "mkdir -p $DESTDIR/usr/lib/udev/rules.d $DESTDIR/etc/udev/rules.d",
+        "cd eudev-3.2.14 && make DESTDIR=$DESTDIR install"
+    ]
+}

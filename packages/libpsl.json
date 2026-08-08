@@ -1,0 +1,19 @@
+{
+  "name": "libpsl",
+  "description": "Library for accessing and resolving information from the Public Suffix List.",
+  "version": "0.21.5",
+  "dependencies": [
+    "meson",
+    "ninja"
+  ],
+  "download": [
+    "wget https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz",
+    "tar -xf libpsl-0.21.5.tar.gz"
+  ],
+  "build": [
+    "cd libpsl-0.21.5 && mkdir -p build && cd build && meson setup --prefix=/usr --buildtype=release .. && ninja $MAKEOPTS"
+  ],
+  "install": [
+    "cd libpsl-0.21.5/build && DESTDIR=$DESTDIR ninja install"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "gperf",
+    "description": "GNU perfect hash function generator.",
+    "version": "3.3",
+    "dependencies": [],
+    "download": [
+        "curl -LO https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz",
+        "tar -xf gperf-3.3.tar.gz"
+    ],
+    "build": [
+        "cd gperf-3.3 && ./configure --prefix=$PREFIX",
+        "cd gperf-3.3 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd gperf-3.3 && make install"
+    ]
+}

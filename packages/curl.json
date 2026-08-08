@@ -1,0 +1,19 @@
+{
+  "name": "curl",
+  "description": "Command line tool and library for transferring files using URL syntax.",
+  "version": "8.18.0",
+  "dependencies": [
+    "libpsl"
+  ],
+  "download": [
+    "wget https://curl.se/download/curl-8.18.0.tar.xz",
+    "tar -xf curl-8.18.0.tar.xz"
+  ],
+  "build": [
+    "cd curl-8.18.0 && ./configure --prefix=/usr --disable-static --with-openssl --with-ca-path=/etc/ssl/certs && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd curl-8.18.0 && DESTDIR=$DESTDIR make install",
+    "cd curl-8.18.0 && rm -rf docs/examples/.deps && find docs \\( -name Makefile\\* -o -name \\*.1 -o -name \\*.3 -o -name CMakeLists.txt \\) -delete && mkdir -p $DESTDIR/usr/share/doc/curl-8.18.0 && cp -v -R docs/* $DESTDIR/usr/share/doc/curl-8.18.0/"
+  ]
+}

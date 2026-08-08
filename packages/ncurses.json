@@ -1,0 +1,17 @@
+{
+    "name": "ncurses",
+    "description": "Library for creating text-based user interfaces (TUIs), providing the terminal-independent screen-handling and keyboard input used by vim, htop and many other terminal programs.",
+    "version": "6.6",
+    "dependencies": [],
+    "download": [
+        "curl -LO https://ftpmirror.gnu.org/ncurses/ncurses-6.6.tar.gz",
+        "tar -xf ncurses-6.6.tar.gz"
+    ],
+    "build": [
+        "cd ncurses-6.6 && ./configure --prefix=$PREFIX --with-shared --without-debug --enable-widec",
+        "cd ncurses-6.6 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd ncurses-6.6 && make install"
+    ]
+}

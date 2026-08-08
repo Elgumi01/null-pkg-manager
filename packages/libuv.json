@@ -1,0 +1,16 @@
+{
+  "name": "libuv",
+  "description": "Multi-platform support library with a focus on asynchronous I/O.",
+  "version": "1.52.0",
+  "dependencies": [],
+  "download": [
+    "curl -LO https://dist.libuv.org/dist/v1.52.0/libuv-v1.52.0.tar.gz",
+    "tar -xf libuv-v1.52.0.tar.gz"
+  ],
+  "build": [
+    "cd libuv-v1.52.0 && sh autogen.sh && ./configure --prefix=/usr --disable-static && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd libuv-v1.52.0 && DESTDIR=$DESTDIR make install"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+    "name": "meson",
+    "description": "High-performance build system that generates Ninja (or other) build files, used to configure and build many modern C/C++ and Xorg/Mesa projects.",
+    "version": "1.11.1",
+    "dependencies": [
+        "ninja"
+    ],
+    "download": [
+        "curl -LO https://github.com/mesonbuild/meson/releases/download/1.11.1/meson-1.11.1.tar.gz",
+        "tar -xf meson-1.11.1.tar.gz"
+    ],
+    "build": [
+        "cd meson-1.11.1 && python3 setup.py build"
+    ],
+    "install": [
+        "cd meson-1.11.1 && python3 setup.py install --root=$DESTDIR --optimize=1"
+    ]
+}

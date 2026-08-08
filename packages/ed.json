@@ -1,0 +1,19 @@
+{
+    "name": "ed",
+    "description": "Ed is a line-oriented text editor, used to create, display, modify and otherwise manipulate text files, both interactively and via shell scripts.",
+    "version": "1.22.5",
+    "dependencies": [
+        "libarchive"
+    ],
+    "download": [
+        "wget https://ftpmirror.gnu.org/ed/ed-1.22.5.tar.lz",
+        "bsdtar -xf ed-1.22.5.tar.lz"
+    ],
+    "build": [
+        "cd ed-1.22.5 && ./configure --prefix=$PREFIX",
+        "cd ed-1.22.5 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd ed-1.22.5 && make install"
+    ]
+}

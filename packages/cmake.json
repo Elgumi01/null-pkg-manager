@@ -1,0 +1,21 @@
+{
+  "name": "cmake",
+  "description": "A modern toolset used for generating Makefiles and other build systems.",
+  "version": "4.2.3",
+  "dependencies": [
+    "curl",
+    "libarchive",
+    "libuv",
+    "nghttp2"
+  ],
+  "download": [
+    "curl -LO https://cmake.org/files/v4.2/cmake-4.2.3.tar.gz",
+    "tar -xf cmake-4.2.3.tar.gz"
+  ],
+  "build": [
+    "cd cmake-4.2.3 && sed -i '/\"lib64\"/s/64//' Modules/GNUInstallDirs.cmake && LD_LIBRARY_PATH=/usr/lib ./bootstrap --prefix=/usr --system-libs --mandir=/share/man --no-system-jsoncpp --no-system-cppdap --no-system-librhash --docdir=/share/doc/cmake-4.2.3 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd cmake-4.2.3 && DESTDIR=$DESTDIR make install"
+  ]
+}

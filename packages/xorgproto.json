@@ -1,0 +1,20 @@
+{
+    "name": "xorgproto",
+    "description": "Provides the X11 protocol header files required to build the X Window System and to allow other applications to build against an installed X Window System.",
+    "version": "2025.1",
+    "dependencies": [
+        "util-macros"
+    ],
+    "download": [
+        "curl -LO https://xorg.freedesktop.org/archive/individual/proto/xorgproto-2025.1.tar.xz",
+        "tar -xf xorgproto-2025.1.tar.xz"
+    ],
+    "build": [
+        "meson setup --prefix=$XORG_PREFIX xorgproto-2025.1/build xorgproto-2025.1",
+        "ninja -C xorgproto-2025.1/build $MAKEOPTS"
+    ],
+    "install": [
+        "ninja -C xorgproto-2025.1/build install",
+        "mv -v $DESTDIR$XORG_PREFIX/share/doc/xorgproto $XORG_PREFIX/share/doc/xorgproto-2025.1"
+    ]
+}

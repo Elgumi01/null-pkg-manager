@@ -1,0 +1,16 @@
+{
+  "name": "nghttp2",
+  "description": "Implementation of HTTP/2 and its HPACK header compression algorithm.",
+  "version": "1.68.0",
+  "dependencies": [],
+  "download": [
+    "curl -LO https://github.com/nghttp2/nghttp2/releases/download/v1.68.0/nghttp2-1.68.0.tar.xz",
+    "tar -xf nghttp2-1.68.0.tar.xz"
+  ],
+  "build": [
+    "cd nghttp2-1.68.0 && ./configure --prefix=/usr --disable-static --enable-lib-only --docdir=/usr/share/doc/nghttp2-1.68.0 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd nghttp2-1.68.0 && DESTDIR=$DESTDIR make install"
+  ]
+}

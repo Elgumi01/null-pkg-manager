@@ -1,0 +1,20 @@
+{
+  "name": "libxml2",
+  "description": "An XML parsing library and utilities.",
+  "version": "2.15.1",
+  "dependencies": [
+    "icu"
+  ],
+  "download": [
+    "curl -LO https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz",
+    "tar -xf libxml2-2.15.1.tar.xz"
+  ],
+  "build": [
+    "cd libxml2-2.15.1 && sed -i \"/'git'/,+3d\" meson.build",
+    "cd libxml2-2.15.1 && mkdir build && cd build && meson setup .. --prefix=/usr -D icu=enabled && ninja"
+  ],
+  "install": [
+    "cd libxml2-2.15.1/build && DESTDIR=$DESTDIR ninja install",
+    "sed \"s/--static/--shared/\" -i $DESTDIR/usr/bin/xml2-config"
+  ]
+}

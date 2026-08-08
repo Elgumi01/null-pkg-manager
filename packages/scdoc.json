@@ -1,0 +1,16 @@
+{
+  "name": "scdoc",
+  "description": "Small man page generator for POSIX systems.",
+  "version": "1.11.3",
+  "dependencies": [],
+  "download": [
+    "curl -LO https://git.sr.ht/~sircmpwn/scdoc/archive/1.11.3.tar.gz",
+    "tar -xf 1.11.3.tar.gz"
+  ],
+  "build": [
+    "cd scdoc-1.11.3 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd scdoc-1.11.3 && DESTDIR=$DESTDIR PREFIX=/usr make install"
+  ]
+}
