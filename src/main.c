@@ -4,6 +4,8 @@
 #include "install.h"
 #include "remove.h"
 #include "search.h"
+#include "list.h"
+#include "reset_db.h"
 
 void print_help(void)
 {
@@ -12,6 +14,7 @@ void print_help(void)
     printf("npkg install [PKG_NAME]        Install a package on the system. (Requires root previleges.)\n");
     printf("npkg install [PKG_NAME]        Remvove a package from the system. (Requires root previleges.)\n");
     printf("npkg search  [PKG_NAME]        Search a package, displays [*] if installed [ ] if not.\n");
+    printf("npkg --reset-db                Reset the entire database of <packages> .json");
     printf("Examples:\n");
     printf("  npkg install gfetch fastfetch\n");
     printf("  npkg remove sysmon\n");
@@ -69,6 +72,17 @@ int main(int argc, char **argv)
             }
             return 0;
         }
+        else if (strcmp(argv[i], "list") == 0)
+        {
+            packages_list();
+            return 0;
+        }
+        else if (strcmp(argv[i], "--reset-db") == 0)
+        {
+            reset_database();
+            return 0;
+        }
+
         else
         {
             fprintf(stderr, "npkg: invalid argument '%s'. Try 'npkg --help'.\n", argv[i]);
