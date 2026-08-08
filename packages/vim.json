@@ -1,16 +1,19 @@
 {
-  "name": "vim",
-  "description": "Vi Improved, a highly configurable text editor.",
-  "version": "9.1",
-  "dependencies": [],
-  "download": [
-    "git clone https://github.com/vim/vim.git"
-  ],
-  "build": [
-    "cd vim && ./configure --prefix=$PREFIX",
-    "cd vim && make $MAKEOPTS"
-  ],
-  "install": [
-    "cd vim && make install"
-  ]
+    "name": "vim",
+    "description": "Highly configurable text editor built to enable efficient text editing, with support for syntax highlighting, plugins, and terminal-based UI via ncurses.",
+    "version": "9.1",
+    "dependencies": [
+        "ncurses"
+    ],
+    "download": [
+        "curl -LO https://github.com/vim/vim/archive/refs/tags/v9.1.0000.tar.gz",
+        "tar -xf v9.1.0000.tar.gz"
+    ],
+    "build": [
+        "cd vim-9.1.0000 && CPPFLAGS=\"-I$PREFIX/include\" LDFLAGS=\"-L$PREFIX/lib\" LD_LIBRARY_PATH=\"$PREFIX/lib:$LD_LIBRARY_PATH\" ./configure --prefix=$PREFIX --with-tlib=ncursesw --enable-multibyte",
+        "cd vim-9.1.0000 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd vim-9.1.0000 && make install"
+    ]
 }
