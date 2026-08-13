@@ -1,2 +1,3 @@
 npkg
+*.o
 Dockerfile
