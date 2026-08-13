@@ -4,13 +4,13 @@
     "version": "2.36.0",
     "dependencies": [],
     "download": [
-        "git clone --depth 1 https://github.com/fastfetch-cli/fastfetch"
+        "git clone --depth 1 --branch 2.36.0 https://github.com/fastfetch-cli/fastfetch"
     ],
     "build": [
-        "cmake -S fastfetch -B fastfetch/build -DCMAKE_INSTALL_PREFIX=$PREFIX",
+        "cmake -S fastfetch -B fastfetch/build -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" -DCMAKE_BUILD_TYPE=Release",
         "cmake --build fastfetch/build -- $MAKEOPTS"
     ],
     "install": [
-        "cmake --install fastfetch/build"
+        "DESTDIR=\"$DESTDIR\" cmake --install fastfetch/build"
     ]
 }

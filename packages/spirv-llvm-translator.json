@@ -1,20 +1,21 @@
 {
-  "name": "spirv-llvm-translator",
-  "description": "A library and utility for converting between LLVM IR and SPIR-V code.",
-  "version": "21.1.4",
-  "dependencies": [
-    "libxml2",
-    "llvm",
-    "spirv-tools"
-  ],
-  "download": [
-    "curl -LO https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v21.1.4/SPIRV-LLVM-Translator-21.1.4.tar.gz",
-    "tar -xf SPIRV-LLVM-Translator-21.1.4.tar.gz"
-  ],
-  "build": [
-    "cd SPIRV-LLVM-Translator-21.1.4 && mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=/usr -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=ON -D CMAKE_SKIP_INSTALL_RPATH=ON -D LLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=/usr -G Ninja .. && ninja $MAKEOPTS"
-  ],
-  "install": [
-    "cd SPIRV-LLVM-Translator-21.1.4/build && DESTDIR=$DESTDIR ninja install"
-  ]
+    "name": "spirv-llvm-translator",
+    "description": "A library and utility for converting between LLVM IR and SPIR-V code.",
+    "version": "21.1.4",
+    "dependencies": [
+        "libxml2",
+        "llvm",
+        "spirv-tools"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o SPIRV-LLVM-Translator-21.1.4.tar.gz https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v21.1.4/SPIRV-LLVM-Translator-21.1.4.tar.gz",
+        "tar -xf SPIRV-LLVM-Translator-21.1.4.tar.gz"
+    ],
+    "build": [
+        "cmake -S SPIRV-LLVM-Translator-21.1.4 -B SPIRV-LLVM-Translator-21.1.4/build -G Ninja -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_SKIP_INSTALL_RPATH=ON -DLLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=\"$PREFIX/include\"",
+        "ninja -C SPIRV-LLVM-Translator-21.1.4/build $MAKEOPTS"
+    ],
+    "install": [
+        "DESTDIR=\"$DESTDIR\" ninja -C SPIRV-LLVM-Translator-21.1.4/build install"
+    ]
 }

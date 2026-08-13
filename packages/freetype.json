@@ -4,8 +4,7 @@
     "version": "2.14.1",
     "dependencies": [],
     "download": [
-        "curl -LO https://sourceforge.net/projects/freetype/files/freetype2/2.14.1/freetype-2.14.1.tar.xz/download",
-        "mv download freetype-2.14.1.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o freetype-2.14.1.tar.xz https://sourceforge.net/projects/freetype/files/freetype2/2.14.1/freetype-2.14.1.tar.xz/download",
         "tar -xf freetype-2.14.1.tar.xz"
     ],
     "build": [
@@ -13,6 +12,6 @@
         "cd freetype-2.14.1 && make $MAKEOPTS"
     ],
     "install": [
-        "cd freetype-2.14.1 && make install"
+        "cd freetype-2.14.1 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

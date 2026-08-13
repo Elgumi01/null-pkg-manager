@@ -1,0 +1,20 @@
+{
+    "name": "binutils",
+    "description": "GNU Binutils package containing a linker, an assembler, and other tools for handling object files, including ar, as, ld, nm, objcopy, objdump, ranlib, readelf, size, strings, and strip.",
+    "version": "2.45",
+    "dependencies": [
+        "zlib"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o binutils-2.45.tar.xz https://ftpmirror.gnu.org/binutils/binutils-2.45.tar.xz",
+        "tar -xf binutils-2.45.tar.xz"
+    ],
+    "build": [
+        "mkdir -v binutils-2.45-build",
+        "cd binutils-2.45-build && ../binutils-2.45/configure --with-system-zlib --prefix=\"$PREFIX\" --sysconfdir=/etc --enable-ld=default --enable-plugins --enable-shared --disable-werror --enable-64-bit-bfd --enable-new-dtags --enable-default-hash-style=gnu",
+        "cd binutils-2.45-build && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd binutils-2.45-build && make DESTDIR=\"$DESTDIR\" install"
+    ]
+}

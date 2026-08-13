@@ -4,13 +4,14 @@
   "version": "0.2.5",
   "dependencies": [],
   "download": [
-    "curl -LO https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz",
+    "curl -fL --retry 3 --retry-delay 2 -o yaml-0.2.5.tar.gz https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz",
     "tar -xf yaml-0.2.5.tar.gz"
   ],
   "build": [
-    "cd yaml-0.2.5 && ./configure --prefix=/usr --disable-static && make $MAKEOPTS"
+    "cd yaml-0.2.5 && ./configure --prefix=\"$PREFIX\" --disable-static",
+    "cd yaml-0.2.5 && make $MAKEOPTS"
   ],
   "install": [
-    "cd yaml-0.2.5 && DESTDIR=$DESTDIR make install"
+    "cd yaml-0.2.5 && make DESTDIR=\"$DESTDIR\" install"
   ]
 }

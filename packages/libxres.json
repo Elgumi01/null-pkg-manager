@@ -1,21 +1,21 @@
 {
-    "name": "libxres",
-    "description": "X-Resource extension client library, providing routines to query X server resource usage such as pixmap and window memory consumption.",
-    "version": "1.2.3",
-    "dependencies": [
-        "libxext",
-        "libx11",
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libXres-1.2.3.tar.xz",
-        "tar -xf libXres-1.2.3.tar.xz"
-    ],
-    "build": [
-        "cd libXres-1.2.3 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXres-1.2.3",
-        "cd libXres-1.2.3 && make $MAKEOPTS"
-    ],
-    "install": [
-        "cd libXres-1.2.3 && make install"
-    ]
+  "name": "libxres",
+  "description": "X-Resource extension client library, providing routines to query X server resource usage such as pixmap and window memory consumption.",
+  "version": "1.2.3",
+  "dependencies": [
+    "libxext",
+    "libx11",
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libXres-1.2.3.tar.xz https://www.x.org/pub/individual/lib/libXres-1.2.3.tar.xz",
+    "tar -xf libXres-1.2.3.tar.xz"
+  ],
+  "build": [
+    "cd libXres-1.2.3 && ./configure $XORG_CONFIG --docdir=\"$XORG_PREFIX/share/doc/libXres-1.2.3\"",
+    "cd libXres-1.2.3 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd libXres-1.2.3 && make DESTDIR=\"$DESTDIR\" install"
+  ]
 }

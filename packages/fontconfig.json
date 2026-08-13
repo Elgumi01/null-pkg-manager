@@ -8,7 +8,7 @@
         "gperf"
     ],
     "download": [
-        "curl -LO https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.18.2/fontconfig-2.18.2.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o fontconfig-2.18.2.tar.xz https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.18.2/fontconfig-2.18.2.tar.xz",
         "tar -xf fontconfig-2.18.2.tar.xz"
     ],
     "build": [
@@ -16,6 +16,6 @@
         "cd fontconfig-2.18.2 && make $MAKEOPTS"
     ],
     "install": [
-        "cd fontconfig-2.18.2 && make install"
+        "cd fontconfig-2.18.2 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

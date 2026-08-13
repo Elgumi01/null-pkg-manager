@@ -6,15 +6,16 @@
     "icu"
   ],
   "download": [
-    "curl -LO https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz",
+    "curl -fL --retry 3 --retry-delay 2 -o libxml2-2.15.1.tar.xz https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz",
     "tar -xf libxml2-2.15.1.tar.xz"
   ],
   "build": [
     "cd libxml2-2.15.1 && sed -i \"/'git'/,+3d\" meson.build",
-    "cd libxml2-2.15.1 && mkdir build && cd build && meson setup .. --prefix=/usr -D icu=enabled && ninja"
+    "meson setup --prefix=\"$PREFIX\" --buildtype=release -D icu=enabled libxml2-2.15.1/build libxml2-2.15.1",
+    "ninja -C libxml2-2.15.1/build $MAKEOPTS"
   ],
   "install": [
-    "cd libxml2-2.15.1/build && DESTDIR=$DESTDIR ninja install",
-    "sed \"s/--static/--shared/\" -i $DESTDIR/usr/bin/xml2-config"
+    "DESTDIR=\"$DESTDIR\" ninja -C libxml2-2.15.1/build install",
+    "sed -i 's/--static/--shared/' \"$DESTDIR$PREFIX/bin/xml2-config\""
   ]
 }

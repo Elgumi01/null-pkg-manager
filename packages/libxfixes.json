@@ -1,20 +1,20 @@
 {
-    "name": "libxfixes",
-    "description": "X Fixes extension client library, providing augmented versions of several core X protocol requests used by cursor and damage tracking.",
-    "version": "6.0.2",
-    "dependencies": [
-        "libx11",
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libXfixes-6.0.2.tar.xz",
-        "tar -xf libXfixes-6.0.2.tar.xz"
-    ],
-    "build": [
-        "cd libXfixes-6.0.2 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXfixes-6.0.2",
-        "cd libXfixes-6.0.2 && make $MAKEOPTS"
-    ],
-    "install": [
-        "cd libXfixes-6.0.2 && make install"
-    ]
+  "name": "libxfixes",
+  "description": "X Fixes extension client library, providing augmented versions of several core X protocol requests used by cursor and damage tracking.",
+  "version": "6.0.2",
+  "dependencies": [
+    "libx11",
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libXfixes-6.0.2.tar.xz https://www.x.org/pub/individual/lib/libXfixes-6.0.2.tar.xz",
+    "tar -xf libXfixes-6.0.2.tar.xz"
+  ],
+  "build": [
+    "cd libXfixes-6.0.2 && ./configure $XORG_CONFIG --docdir=\"$XORG_PREFIX/share/doc/libXfixes-6.0.2\"",
+    "cd libXfixes-6.0.2 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd libXfixes-6.0.2 && make DESTDIR=\"$DESTDIR\" install"
+  ]
 }

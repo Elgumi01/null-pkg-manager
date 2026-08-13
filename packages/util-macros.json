@@ -4,13 +4,13 @@
     "version": "1.20.2",
     "dependencies": [],
     "download": [
-        "curl -LO https://www.x.org/pub/individual/util/util-macros-1.20.2.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o util-macros-1.20.2.tar.xz https://www.x.org/pub/individual/util/util-macros-1.20.2.tar.xz",
         "tar -xf util-macros-1.20.2.tar.xz"
     ],
     "build": [
         "cd util-macros-1.20.2 && ./configure $XORG_CONFIG"
     ],
     "install": [
-        "cd util-macros-1.20.2 && make install"
+        "cd util-macros-1.20.2 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

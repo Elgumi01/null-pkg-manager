@@ -4,13 +4,13 @@
     "version": "1.13.2",
     "dependencies": [],
     "download": [
-        "curl -LO https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz",
-        "tar -xf v1.13.2.tar.gz"
+        "curl -fL --retry 3 --retry-delay 2 -o ninja-1.13.2.tar.gz https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz",
+        "tar -xf ninja-1.13.2.tar.gz"
     ],
     "build": [
         "cd ninja-1.13.2 && python3 configure.py --bootstrap"
     ],
     "install": [
-        "install -Dm755 ninja-1.13.2/ninja $PREFIX/bin/ninja"
+        "install -Dm755 ninja-1.13.2/ninja \"$DESTDIR$PREFIX/bin/ninja\""
     ]
 }

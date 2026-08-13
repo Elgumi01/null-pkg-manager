@@ -4,14 +4,15 @@
   "version": "3.8.5",
   "dependencies": [],
   "download": [
-    "wget https://github.com/libarchive/libarchive/releases/download/v3.8.5/libarchive-3.8.5.tar.xz",
+    "curl -fL --retry 3 --retry-delay 2 -o libarchive-3.8.5.tar.xz https://github.com/libarchive/libarchive/releases/download/v3.8.5/libarchive-3.8.5.tar.xz",
     "tar -xf libarchive-3.8.5.tar.xz"
   ],
   "build": [
-    "cd libarchive-3.8.5 && ./configure --prefix=/usr --disable-static && make $MAKEOPTS"
+    "cd libarchive-3.8.5 && ./configure --prefix=\"$PREFIX\" --disable-static",
+    "cd libarchive-3.8.5 && make $MAKEOPTS"
   ],
   "install": [
-    "cd libarchive-3.8.5 && DESTDIR=$DESTDIR make install",
-    "ln -sfv bsdunzip $DESTDIR/usr/bin/unzip"
+    "cd libarchive-3.8.5 && make DESTDIR=\"$DESTDIR\" install",
+    "ln -sfv bsdunzip \"$DESTDIR$PREFIX/bin/unzip\""
   ]
 }

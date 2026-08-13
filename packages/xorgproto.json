@@ -6,15 +6,15 @@
         "util-macros"
     ],
     "download": [
-        "curl -LO https://xorg.freedesktop.org/archive/individual/proto/xorgproto-2025.1.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o xorgproto-2025.1.tar.xz https://xorg.freedesktop.org/archive/individual/proto/xorgproto-2025.1.tar.xz",
         "tar -xf xorgproto-2025.1.tar.xz"
     ],
     "build": [
-        "meson setup --prefix=$XORG_PREFIX xorgproto-2025.1/build xorgproto-2025.1",
+        "meson setup xorgproto-2025.1/build xorgproto-2025.1 --prefix=\"$XORG_PREFIX\" --buildtype=release --wrap-mode=nodownload",
         "ninja -C xorgproto-2025.1/build $MAKEOPTS"
     ],
     "install": [
-        "ninja -C xorgproto-2025.1/build install",
-        "mv -v $DESTDIR$XORG_PREFIX/share/doc/xorgproto $XORG_PREFIX/share/doc/xorgproto-2025.1"
+        "DESTDIR=\"$DESTDIR\" ninja -C xorgproto-2025.1/build install",
+        "mv -v \"$DESTDIR$XORG_PREFIX/share/doc/xorgproto\" \"$DESTDIR$XORG_PREFIX/share/doc/xorgproto-2025.1\""
     ]
 }

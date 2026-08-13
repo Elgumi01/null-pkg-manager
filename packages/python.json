@@ -1,0 +1,21 @@
+{
+    "name": "python",
+    "description": "CPython interpreter, the reference implementation of the Python programming language, built with shared library support and required by pip3, setuptools, and other Python-based build tooling.",
+    "version": "3.13.7",
+    "dependencies": [
+        "expat",
+        "zlib",
+        "openssl"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o Python-3.13.7.tar.xz https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz",
+        "tar -xf Python-3.13.7.tar.xz"
+    ],
+    "build": [
+        "cd Python-3.13.7 && ./configure --prefix=\"$PREFIX\" --with-openssl=\"$PREFIX\" --enable-shared --with-system-expat --with-ensurepip=yes --enable-optimizations --without-static-libpython",
+        "cd Python-3.13.7 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd Python-3.13.7 && make DESTDIR=\"$DESTDIR\" install"
+    ]
+}

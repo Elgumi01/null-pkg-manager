@@ -2,15 +2,21 @@
   "name": "libuv",
   "description": "Multi-platform support library with a focus on asynchronous I/O.",
   "version": "1.52.0",
-  "dependencies": [],
+  "dependencies": [
+    "autoconf",
+    "automake",
+    "libtool"
+  ],
   "download": [
-    "curl -LO https://dist.libuv.org/dist/v1.52.0/libuv-v1.52.0.tar.gz",
+    "curl -fL --retry 3 --retry-delay 2 -o libuv-v1.52.0.tar.gz https://dist.libuv.org/dist/v1.52.0/libuv-v1.52.0.tar.gz",
     "tar -xf libuv-v1.52.0.tar.gz"
   ],
   "build": [
-    "cd libuv-v1.52.0 && sh autogen.sh && ./configure --prefix=/usr --disable-static && make $MAKEOPTS"
+    "cd libuv-v1.52.0 && sh autogen.sh",
+    "cd libuv-v1.52.0 && ./configure --prefix=\"$PREFIX\" --disable-static",
+    "cd libuv-v1.52.0 && make $MAKEOPTS"
   ],
   "install": [
-    "cd libuv-v1.52.0 && DESTDIR=$DESTDIR make install"
+    "cd libuv-v1.52.0 && make DESTDIR=\"$DESTDIR\" install"
   ]
 }

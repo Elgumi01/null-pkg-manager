@@ -6,14 +6,14 @@
         "xorgproto"
     ],
     "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/xtrans-1.6.0.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o xtrans-1.6.0.tar.xz https://www.x.org/pub/individual/lib/xtrans-1.6.0.tar.xz",
         "tar -xf xtrans-1.6.0.tar.xz"
     ],
     "build": [
-        "cd xtrans-1.6.0 && ./configure --prefix=$XORG_PREFIX --docdir=$XORG_PREFIX/share/doc/xtrans-1.6.0",
+        "cd xtrans-1.6.0 && ./configure --prefix=\"$XORG_PREFIX\" --docdir=\"$XORG_PREFIX/share/doc/xtrans-1.6.0\"",
         "cd xtrans-1.6.0 && make $MAKEOPTS"
     ],
     "install": [
-        "cd xtrans-1.6.0 && make install"
+        "cd xtrans-1.6.0 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

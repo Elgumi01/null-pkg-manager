@@ -1,19 +1,19 @@
 {
-  "name": "rustc",
-  "description": "The Rust programming language compiler and toolchain.",
-  "version": "1.93.1",
-  "dependencies": [
-    "cmake",
-    "curl"
-  ],
-  "download": [
-    "curl -LO https://static.rust-lang.org/dist/rustc-1.93.1-src.tar.xz",
-    "tar -xf rustc-1.93.1-src.tar.xz"
-  ],
-  "build": [
-    "cd rustc-1.93.1-src && cat > bootstrap.toml <<'BOOTSTRAP'\nchange-id = 148795\n\n[llvm]\ntargets = \"X86\"\n\n[build]\ndescription = \"for NullOS\"\ndocs = false\nlocked-deps = true\ntools = [\"cargo\", \"clippy\", \"rustdoc\", \"rustfmt\", \"src\"]\n\n[install]\nprefix = \"/usr\"\ndocdir = \"share/doc/rustc-1.93.1\"\n\n[rust]\nchannel = \"stable\"\nlto = \"thin\"\ncodegen-units = 1\nllvm-bitcode-linker = false\nBOOTSTRAP\n./x.py build"
-  ],
-  "install": [
-    "cd rustc-1.93.1-src && DESTDIR=$DESTDIR ./x.py install"
-  ]
+    "name": "rustc",
+    "description": "The Rust programming language compiler and toolchain.",
+    "version": "1.93.1",
+    "dependencies": [
+        "cmake",
+        "curl"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o rustc-1.93.1-src.tar.xz https://static.rust-lang.org/dist/rustc-1.93.1-src.tar.xz",
+        "tar -xf rustc-1.93.1-src.tar.xz"
+    ],
+    "build": [
+        "cd rustc-1.93.1-src && cat > bootstrap.toml <<'BOOTSTRAP'\nchange-id = 148795\n\n[llvm]\ntargets = \"X86\"\n\n[build]\ndescription = \"for NullOS\"\ndocs = false\nlocked-deps = true\ntools = [\"cargo\", \"clippy\", \"rustdoc\", \"rustfmt\", \"src\"]\n\n[install]\nprefix = \"$PREFIX\"\ndocdir = \"share/doc/rustc-1.93.1\"\n\n[rust]\nchannel = \"stable\"\nlto = \"thin\"\ncodegen-units = 1\nllvm-bitcode-linker = false\nBOOTSTRAP\n./x.py build"
+    ],
+    "install": [
+        "cd rustc-1.93.1-src && DESTDIR=\"$DESTDIR\" ./x.py install"
+    ]
 }

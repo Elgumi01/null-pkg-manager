@@ -1,20 +1,20 @@
 {
-    "name": "libsm",
-    "description": "X Session Management Library, providing the client-side API used by applications to save and restore session state.",
-    "version": "1.2.6",
-    "dependencies": [
-        "libice",
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libSM-1.2.6.tar.xz",
-        "tar -xf libSM-1.2.6.tar.xz"
-    ],
-    "build": [
-        "cd libSM-1.2.6 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libSM-1.2.6",
-        "cd libSM-1.2.6 && make $MAKEOPTS"
-    ],
-    "install": [
-        "cd libSM-1.2.6 && make install"
-    ]
+  "name": "libsm",
+  "description": "X Session Management Library, providing the client-side API used by applications to save and restore session state.",
+  "version": "1.2.6",
+  "dependencies": [
+    "libice",
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libSM-1.2.6.tar.xz https://www.x.org/pub/individual/lib/libSM-1.2.6.tar.xz",
+    "tar -xf libSM-1.2.6.tar.xz"
+  ],
+  "build": [
+    "cd libSM-1.2.6 && ./configure $XORG_CONFIG --docdir=\"$XORG_PREFIX/share/doc/libSM-1.2.6\"",
+    "cd libSM-1.2.6 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd libSM-1.2.6 && make DESTDIR=\"$DESTDIR\" install"
+  ]
 }

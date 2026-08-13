@@ -4,12 +4,12 @@
     "version": "0.1.0",
     "dependencies": [],
     "download": [
-        "git clone --depth 1 https://github.com/Elgumi01/gfetch"
+        "git clone --depth 1 --branch 0.1.0 https://github.com/Elgumi01/gfetch"
     ],
     "build": [
-        "cd gfetch && make"
+        "cd gfetch && make $MAKEOPTS"
     ],
     "install": [
-        "cd gfetch && make install"
+        "cd gfetch && make DESTDIR=\"$DESTDIR\" PREFIX=\"$PREFIX\" install"
     ]
 }

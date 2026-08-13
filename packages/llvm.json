@@ -1,0 +1,33 @@
+{
+  "name": "llvm",
+  "description": "Collection of modular and reusable compiler and toolchain technologies, including the LLVM core libraries and Clang, required by Mesa for the llvmpipe, r300, r600, and radeonsi Gallium drivers.",
+  "version": "21.1.8",
+  "dependencies": [
+    "cmake",
+    "ninja",
+    "libffi"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o llvm-21.1.8.src.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/llvm-21.1.8.src.tar.xz",
+    "curl -fL --retry 3 --retry-delay 2 -o clang-21.1.8.src.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang-21.1.8.src.tar.xz",
+    "curl -fL --retry 3 --retry-delay 2 -o llvm-cmake-21.1.8.src.tar.xz https://anduin.linuxfromscratch.org/BLFS/llvm/llvm-cmake-21.1.8.src.tar.xz",
+    "curl -fL --retry 3 --retry-delay 2 -o llvm-third-party-21.1.8.src.tar.xz https://anduin.linuxfromscratch.org/BLFS/llvm/llvm-third-party-21.1.8.src.tar.xz",
+    "mkdir -p llvm-project",
+    "tar -xf llvm-21.1.8.src.tar.xz -C llvm-project",
+    "mv llvm-project/llvm-21.1.8.src llvm-project/llvm",
+    "tar -xf clang-21.1.8.src.tar.xz -C llvm-project",
+    "mv llvm-project/clang-21.1.8.src llvm-project/clang",
+    "tar -xf llvm-cmake-21.1.8.src.tar.xz -C llvm-project",
+    "mv llvm-project/cmake-21.1.8.src llvm-project/cmake",
+    "tar -xf llvm-third-party-21.1.8.src.tar.xz -C llvm-project",
+    "mv llvm-project/third-party-21.1.8.src llvm-project/third-party"
+  ],
+  "build": [
+    "mkdir -p llvm-project/llvm/build",
+    "cd llvm-project/llvm/build && CC=gcc CXX=g++ cmake -G Ninja -S .. -B . -D CMAKE_INSTALL_PREFIX=\"$PREFIX\" -D CMAKE_SKIP_INSTALL_RPATH=ON -D LLVM_ENABLE_FFI=ON -D CMAKE_BUILD_TYPE=Release -D LLVM_BUILD_LLVM_DYLIB=ON -D LLVM_LINK_LLVM_DYLIB=ON -D LLVM_ENABLE_RTTI=ON -D LLVM_ENABLE_PROJECTS=clang -D LLVM_TARGETS_TO_BUILD=\"host;AMDGPU\" -D LLVM_BINUTILS_INCDIR=\"$PREFIX/include\" -D LLVM_INCLUDE_BENCHMARKS=OFF -D CLANG_DEFAULT_PIE_ON_LINUX=ON -D CLANG_CONFIG_FILE_SYSTEM_DIR=/etc/clang -D LLVM_TOOL_GOLD_BUILD=OFF -W no-dev",
+    "ninja -C llvm-project/llvm/build $MAKEOPTS"
+  ],
+  "install": [
+    "DESTDIR=\"$DESTDIR\" ninja -C llvm-project/llvm/build install"
+  ]
+}

@@ -1,19 +1,20 @@
 {
-  "name": "spirv-tools",
-  "description": "Libraries and utilities for processing SPIR-V modules.",
-  "version": "1.4.341.0",
-  "dependencies": [
-    "cmake",
-    "spirv-headers"
-  ],
-  "download": [
-    "curl -LO https://github.com/KhronosGroup/SPIRV-Tools/archive/vulkan-sdk-1.4.341.0/SPIRV-Tools-vulkan-sdk-1.4.341.0.tar.gz",
-    "tar -xf SPIRV-Tools-vulkan-sdk-1.4.341.0.tar.gz"
-  ],
-  "build": [
-    "cd SPIRV-Tools-vulkan-sdk-1.4.341.0 && mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=/usr -D CMAKE_BUILD_TYPE=Release -D SPIRV_WERROR=OFF -D BUILD_SHARED_LIBS=ON -D SPIRV_TOOLS_BUILD_STATIC=OFF -D SPIRV-Headers_SOURCE_DIR=/usr -G Ninja .. && ninja $MAKEOPTS"
-  ],
-  "install": [
-    "cd SPIRV-Tools-vulkan-sdk-1.4.341.0/build && DESTDIR=$DESTDIR ninja install"
-  ]
+    "name": "spirv-tools",
+    "description": "Libraries and utilities for processing SPIR-V modules.",
+    "version": "1.4.341.0",
+    "dependencies": [
+        "cmake",
+        "spirv-headers"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o SPIRV-Tools-vulkan-sdk-1.4.341.0.tar.gz https://github.com/KhronosGroup/SPIRV-Tools/archive/vulkan-sdk-1.4.341.0/SPIRV-Tools-vulkan-sdk-1.4.341.0.tar.gz",
+        "tar -xf SPIRV-Tools-vulkan-sdk-1.4.341.0.tar.gz"
+    ],
+    "build": [
+        "cmake -S SPIRV-Tools-vulkan-sdk-1.4.341.0 -B SPIRV-Tools-vulkan-sdk-1.4.341.0/build -G Ninja -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" -DCMAKE_BUILD_TYPE=Release -DSPIRV_WERROR=OFF -DBUILD_SHARED_LIBS=ON -DSPIRV_TOOLS_BUILD_STATIC=OFF -DSPIRV-Headers_SOURCE_DIR=\"$PREFIX\"",
+        "ninja -C SPIRV-Tools-vulkan-sdk-1.4.341.0/build $MAKEOPTS"
+    ],
+    "install": [
+        "DESTDIR=\"$DESTDIR\" ninja -C SPIRV-Tools-vulkan-sdk-1.4.341.0/build install"
+    ]
 }

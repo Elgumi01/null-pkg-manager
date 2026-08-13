@@ -6,14 +6,14 @@
         "ncurses"
     ],
     "download": [
-        "curl -LO https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
+        "curl -fL --retry 3 --retry-delay 2 -o readline-8.3.tar.gz https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
         "tar -xf readline-8.3.tar.gz"
     ],
     "build": [
-        "cd readline-8.3 && ./configure --prefix=/usr --disable-static --with-curses",
+        "cd readline-8.3 && ./configure --prefix=\"$PREFIX\" --disable-static --with-curses",
         "cd readline-8.3 && make SHLIB_LIBS=\"-lncursesw\" $MAKEOPTS"
     ],
     "install": [
-        "cd readline-8.3 && make DESTDIR=$DESTDIR install"
+        "cd readline-8.3 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

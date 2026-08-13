@@ -1,0 +1,19 @@
+{
+    "name": "pkgconf",
+    "description": "Successor to pkg-config, providing a tool for passing include and library paths to build tools during the configure and make phases of package installations, along with a pkg-config compatibility symlink.",
+    "version": "2.5.1",
+    "dependencies": [],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o pkgconf-2.5.1.tar.xz https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
+        "tar -xf pkgconf-2.5.1.tar.xz"
+    ],
+    "build": [
+        "cd pkgconf-2.5.1 && ./configure --prefix=\"$PREFIX\" --disable-static --docdir=\"$PREFIX/share/doc/pkgconf-2.5.1\" --with-system-libdir=\"$PREFIX/lib:$PREFIX/lib64\" --with-system-includedir=\"$PREFIX/include\"",
+        "cd pkgconf-2.5.1 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd pkgconf-2.5.1 && make DESTDIR=\"$DESTDIR\" install",
+        "ln -sfv pkgconf \"$DESTDIR$PREFIX/bin/pkg-config\"",
+        "ln -sfv pkgconf.1 \"$DESTDIR$PREFIX/share/man/man1/pkg-config.1\""
+    ]
+}

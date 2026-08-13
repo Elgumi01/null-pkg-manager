@@ -5,6 +5,7 @@
     "dependencies": [
         "xorg-libraries",
         "libdrm",
+        "libelf",
         "mako",
         "pyyaml",
         "glslang",
@@ -12,17 +13,18 @@
         "rust-bindgen",
         "libclc",
         "meson",
-        "ninja"
+        "ninja",
+        "wayland-protocols"
     ],
     "download": [
-        "curl -LO https://mesa.freedesktop.org/archive/mesa-25.3.5.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o mesa-25.3.5.tar.xz https://mesa.freedesktop.org/archive/mesa-25.3.5.tar.xz",
         "tar -xf mesa-25.3.5.tar.xz"
     ],
     "build": [
-        "meson setup mesa-25.3.5/build mesa-25.3.5 --prefix=$XORG_PREFIX --buildtype=release -D platforms=x11,wayland -D gallium-drivers=auto -D vulkan-drivers=auto -D valgrind=disabled -D video-codecs=all -D libunwind=disabled",
+        "meson setup mesa-25.3.5 mesa-25.3.5/build --prefix=\"$XORG_PREFIX\" --buildtype=release -D platforms=x11,wayland -D gallium-drivers=llvmpipe,radeonsi,r300,r600,nouveau,zink -D vulkan-drivers=amd -D valgrind=disabled -D video-codecs=all -D libunwind=disabled --wrap-mode=nodownload",
         "ninja -C mesa-25.3.5/build $MAKEOPTS"
     ],
     "install": [
-        "ninja -C mesa-25.3.5/build install"
+        "DESTDIR=\"$DESTDIR\" ninja -C mesa-25.3.5/build install"
     ]
 }

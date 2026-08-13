@@ -1,21 +1,21 @@
 {
-    "name": "libxxf86dga",
-    "description": "Client library for the XFree86-DGA extension, providing direct graphics access for full-screen applications bypassing the normal X protocol path.",
-    "version": "1.1.7",
-    "dependencies": [
-        "libxext",
-        "libx11",
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libXxf86dga-1.1.7.tar.xz",
-        "tar -xf libXxf86dga-1.1.7.tar.xz"
-    ],
-    "build": [
-        "cd libXxf86dga-1.1.7 && ./configure $XORG_CONFIG --docdir=$XORG_PREFIX/share/doc/libXxf86dga-1.1.7",
-        "cd libXxf86dga-1.1.7 && make $MAKEOPTS"
-    ],
-    "install": [
-        "cd libXxf86dga-1.1.7 && make install"
-    ]
+  "name": "libxxf86dga",
+  "description": "Client library for the XFree86-DGA extension, providing direct graphics access for full-screen applications bypassing the normal X protocol path.",
+  "version": "1.1.7",
+  "dependencies": [
+    "libxext",
+    "libx11",
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libXxf86dga-1.1.7.tar.xz https://www.x.org/pub/individual/lib/libXxf86dga-1.1.7.tar.xz",
+    "tar -xf libXxf86dga-1.1.7.tar.xz"
+  ],
+  "build": [
+    "cd libXxf86dga-1.1.7 && ./configure $XORG_CONFIG --docdir=\"$XORG_PREFIX/share/doc/libXxf86dga-1.1.7\"",
+    "cd libXxf86dga-1.1.7 && make $MAKEOPTS"
+  ],
+  "install": [
+    "cd libXxf86dga-1.1.7 && make DESTDIR=\"$DESTDIR\" install"
+  ]
 }

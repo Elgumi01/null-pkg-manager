@@ -1,19 +1,19 @@
 {
-    "name": "libpciaccess",
-    "description": "Generic PCI access library for X, providing a platform-independent interface to query and configure PCI devices, used by graphics drivers.",
-    "version": "0.18.1",
-    "dependencies": [
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libpciaccess-0.18.1.tar.xz",
-        "tar -xf libpciaccess-0.18.1.tar.xz"
-    ],
-    "build": [
-        "meson setup --prefix=$XORG_PREFIX --buildtype=release libpciaccess-0.18.1/build libpciaccess-0.18.1",
-        "ninja -C libpciaccess-0.18.1/build $MAKEOPTS"
-    ],
-    "install": [
-        "ninja -C libpciaccess-0.18.1/build install"
-    ]
+  "name": "libpciaccess",
+  "description": "Generic PCI access library for X, providing a platform-independent interface to query and configure PCI devices, used by graphics drivers.",
+  "version": "0.18.1",
+  "dependencies": [
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libpciaccess-0.18.1.tar.xz https://www.x.org/pub/individual/lib/libpciaccess-0.18.1.tar.xz",
+    "tar -xf libpciaccess-0.18.1.tar.xz"
+  ],
+  "build": [
+    "meson setup --prefix=\"$XORG_PREFIX\" --buildtype=release libpciaccess-0.18.1/build libpciaccess-0.18.1",
+    "ninja -C libpciaccess-0.18.1/build $MAKEOPTS"
+  ],
+  "install": [
+    "DESTDIR=\"$DESTDIR\" ninja -C libpciaccess-0.18.1/build install"
+  ]
 }

@@ -4,18 +4,18 @@
     "version": "10.2p1",
     "dependencies": [],
     "download": [
-        "wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz",
+        "curl -fL --retry 3 --retry-delay 2 -o openssh-10.2p1.tar.gz https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz",
         "tar -xf openssh-10.2p1.tar.gz"
     ],
     "prepare": [
-        "groupadd -g 50 sshd",
-        "useradd -c 'sshd PrivSep' -d /var/lib/sshd -g sshd -s /bin/false -u 50 sshd"
+        "groupadd -g 50 sshd 2>/dev/null || true",
+        "useradd -c 'sshd PrivSep' -d /var/lib/sshd -g sshd -s /bin/false -u 50 sshd 2>/dev/null || true"
     ],
     "build": [
-        "cd openssh-10.2p1 && ./configure --prefix=$PREFIX --sysconfdir=/etc/ssh --with-privsep-path=/var/lib/sshd --with-pid-dir=/run",
+        "cd openssh-10.2p1 && ./configure --prefix=\"$PREFIX\" --sysconfdir=/etc/ssh --with-privsep-path=/var/lib/sshd --with-pid-dir=/run",
         "cd openssh-10.2p1 && make $MAKEOPTS"
     ],
     "install": [
-        "cd openssh-10.2p1 && make install"
+        "cd openssh-10.2p1 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

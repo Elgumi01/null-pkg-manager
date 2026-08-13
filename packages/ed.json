@@ -6,14 +6,14 @@
         "libarchive"
     ],
     "download": [
-        "wget https://ftpmirror.gnu.org/ed/ed-1.22.5.tar.lz",
+        "curl -fL --retry 3 --retry-delay 2 -o ed-1.22.5.tar.lz https://ftpmirror.gnu.org/ed/ed-1.22.5.tar.lz",
         "bsdtar -xf ed-1.22.5.tar.lz"
     ],
     "build": [
-        "cd ed-1.22.5 && ./configure --prefix=$PREFIX",
+        "cd ed-1.22.5 && ./configure --prefix=\"$PREFIX\"",
         "cd ed-1.22.5 && make $MAKEOPTS"
     ],
     "install": [
-        "cd ed-1.22.5 && make install"
+        "cd ed-1.22.5 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

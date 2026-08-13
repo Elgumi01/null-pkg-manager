@@ -1,0 +1,19 @@
+{
+    "name": "wayland-protocols",
+    "description": "Collection of Wayland protocol extensions maintained by the Wayland project, required by Mesa and other Wayland compositors/clients for protocols beyond the Wayland core.",
+    "version": "1.48",
+    "dependencies": [
+        "wayland"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o wayland-protocols-1.48.tar.xz https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.48/downloads/wayland-protocols-1.48.tar.xz",
+        "tar -xf wayland-protocols-1.48.tar.xz"
+    ],
+    "build": [
+        "meson setup wayland-protocols-1.48/build wayland-protocols-1.48 --prefix=\"$XORG_PREFIX\" --buildtype=release --wrap-mode=nodownload",
+        "ninja -C wayland-protocols-1.48/build $MAKEOPTS"
+    ],
+    "install": [
+        "DESTDIR=\"$DESTDIR\" ninja -C wayland-protocols-1.48/build install"
+    ]
+}

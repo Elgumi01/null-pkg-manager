@@ -1,0 +1,17 @@
+{
+    "name": "xz",
+    "description": "XZ Utils provide a general-purpose data-compression library plus command-line tools, supporting the .xz and legacy .lzma formats.",
+    "version": "5.8.3",
+    "dependencies": [],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o xz-5.8.3.tar.gz https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz",
+        "tar -xf xz-5.8.3.tar.gz"
+    ],
+    "build": [
+        "cd xz-5.8.3 && ./configure --prefix=\"$PREFIX\" --disable-static",
+        "cd xz-5.8.3 && make $MAKEOPTS"
+    ],
+    "install": [
+        "cd xz-5.8.3 && make DESTDIR=\"$DESTDIR\" install"
+    ]
+}

@@ -6,14 +6,14 @@
         "ncurses"
     ],
     "download": [
-        "curl -LO https://github.com/vim/vim/archive/refs/tags/v9.1.0000.tar.gz",
+        "curl -fL --retry 3 --retry-delay 2 -o v9.1.0000.tar.gz https://github.com/vim/vim/archive/refs/tags/v9.1.0000.tar.gz",
         "tar -xf v9.1.0000.tar.gz"
     ],
     "build": [
-        "cd vim-9.1.0000 && CPPFLAGS=\"-I$PREFIX/include\" LDFLAGS=\"-L$PREFIX/lib\" LD_LIBRARY_PATH=\"$PREFIX/lib:$LD_LIBRARY_PATH\" ./configure --prefix=$PREFIX --with-tlib=ncursesw --enable-multibyte",
+        "cd vim-9.1.0000 && CPPFLAGS=\"-I$PREFIX/include\" LDFLAGS=\"-L$PREFIX/lib\" LD_LIBRARY_PATH=\"$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\" ./configure --prefix=\"$PREFIX\" --with-tlib=ncursesw --enable-multibyte",
         "cd vim-9.1.0000 && make $MAKEOPTS"
     ],
     "install": [
-        "cd vim-9.1.0000 && make install"
+        "cd vim-9.1.0000 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }

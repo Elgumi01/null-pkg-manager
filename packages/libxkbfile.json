@@ -1,20 +1,20 @@
 {
-    "name": "libxkbfile",
-    "description": "xkbfile Library, providing routines to read and manipulate XKB keyboard layout description files, used by keyboard configuration tools.",
-    "version": "1.2.0",
-    "dependencies": [
-        "libx11",
-        "xorgproto"
-    ],
-    "download": [
-        "curl -LO https://www.x.org/pub/individual/lib/libxkbfile-1.2.0.tar.xz",
-        "tar -xf libxkbfile-1.2.0.tar.xz"
-    ],
-    "build": [
-        "meson setup --prefix=$XORG_PREFIX --buildtype=release libxkbfile-1.2.0/build libxkbfile-1.2.0",
-        "ninja -C libxkbfile-1.2.0/build $MAKEOPTS"
-    ],
-    "install": [
-        "ninja -C libxkbfile-1.2.0/build install"
-    ]
+  "name": "libxkbfile",
+  "description": "xkbfile Library, providing routines to read and manipulate XKB keyboard layout description files, used by keyboard configuration tools.",
+  "version": "1.2.0",
+  "dependencies": [
+    "libx11",
+    "xorgproto"
+  ],
+  "download": [
+    "curl -fL --retry 3 --retry-delay 2 -o libxkbfile-1.2.0.tar.xz https://www.x.org/pub/individual/lib/libxkbfile-1.2.0.tar.xz",
+    "tar -xf libxkbfile-1.2.0.tar.xz"
+  ],
+  "build": [
+    "meson setup --prefix=\"$XORG_PREFIX\" --buildtype=release libxkbfile-1.2.0/build libxkbfile-1.2.0",
+    "ninja -C libxkbfile-1.2.0/build $MAKEOPTS"
+  ],
+  "install": [
+    "DESTDIR=\"$DESTDIR\" ninja -C libxkbfile-1.2.0/build install"
+  ]
 }

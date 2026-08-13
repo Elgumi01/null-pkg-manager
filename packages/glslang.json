@@ -1,20 +1,21 @@
 {
-  "name": "glslang",
-  "description": "Khronos-reference front end for GLSL/ESSL, partial front end for HLSL, and a SPIR-V generator.",
-  "version": "16.2.0",
-  "dependencies": [
-    "spirv-tools",
-    "ninja",
-    "cmake"
-  ],
-  "download": [
-    "curl -LO https://github.com/KhronosGroup/glslang/archive/16.2.0/glslang-16.2.0.tar.gz",
-    "tar -xf glslang-16.2.0.tar.gz"
-  ],
-  "build": [
-    "cd glslang-16.2.0 && mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=/usr -D CMAKE_BUILD_TYPE=Release -D ALLOW_EXTERNAL_SPIRV_TOOLS=ON -D BUILD_SHARED_LIBS=ON -D GLSLANG_TESTS=OFF -G Ninja .. && ninja $MAKEOPTS"
-  ],
-  "install": [
-    "cd glslang-16.2.0/build && DESTDIR=$DESTDIR ninja install"
-  ]
+    "name": "glslang",
+    "description": "Khronos-reference front end for GLSL/ESSL, partial front end for HLSL, and a SPIR-V generator.",
+    "version": "16.2.0",
+    "dependencies": [
+        "spirv-tools",
+        "ninja",
+        "cmake"
+    ],
+    "download": [
+        "curl -fL --retry 3 --retry-delay 2 -o glslang-16.2.0.tar.gz https://github.com/KhronosGroup/glslang/archive/16.2.0/glslang-16.2.0.tar.gz",
+        "tar -xf glslang-16.2.0.tar.gz"
+    ],
+    "build": [
+        "cd glslang-16.2.0 && cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" -DCMAKE_BUILD_TYPE=Release -DALLOW_EXTERNAL_SPIRV_TOOLS=ON -DBUILD_SHARED_LIBS=ON -DGLSLANG_TESTS=OFF",
+        "cmake --build glslang-16.2.0/build -- $MAKEOPTS"
+    ],
+    "install": [
+        "DESTDIR=\"$DESTDIR\" cmake --install glslang-16.2.0/build"
+    ]
 }

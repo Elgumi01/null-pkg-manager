@@ -4,14 +4,14 @@
     "version": "1.3.2",
     "dependencies": [],
     "download": [
-        "curl -LO https://zlib.net/zlib-1.3.2.tar.xz",
+        "curl -fL --retry 3 --retry-delay 2 -o zlib-1.3.2.tar.xz https://zlib.net/zlib-1.3.2.tar.xz",
         "tar -xf zlib-1.3.2.tar.xz"
     ],
     "build": [
-        "cd zlib-1.3.2 && ./configure --prefix=$PREFIX",
+        "cd zlib-1.3.2 && ./configure --prefix=\"$PREFIX\"",
         "cd zlib-1.3.2 && make $MAKEOPTS"
     ],
     "install": [
-        "cd zlib-1.3.2 && make install"
+        "cd zlib-1.3.2 && make DESTDIR=\"$DESTDIR\" install"
     ]
 }
