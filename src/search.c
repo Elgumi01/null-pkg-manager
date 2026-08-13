@@ -1,66 +1,19 @@
-/*
- * search.c - package search module for npkg
- *
- * Reads a package manifest from MANIFEST_DIR and shows
- * its information.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <string.h>
-#include <cjson/cJSON.h>
+#include <errno.h>
 
 #include "config.h"
 
-#define NPKG_PATH_MAX 512
+#include "common/log.h"
+#include "common/validate.h"
+#include "common/paths.h"
+#include "common/manifest.h"
+#include "common/env.h"
 
-#define ERR(...) fprintf(stderr, "npkg: " __VA_ARGS__)
-
-/*
- * Verify if 'package_name' is a valid name, returning 1 if
- * valid and 0 otherwise.
-*/
-
-static int is_valid_package_name(char *package_name)
-{
-    if (!package_name || package_name[0] == '\0')
-        return 0;
-
-    if (strcmp(package_name, ".") == 0 || strcmp(package_name, "..") == 0)
-        return 0;
-
-    if (strchr(package_name, '/') != NULL)
-        return 0;
-
-    return 1;
-}
-
-/* Return 1 if 'package_name' has a manifest under MANIFEST_DIR, 0 otherwise  */
-
-static int is_installed(char *package_name)
-{
-    char installed_package_path[NPKG_PATH_MAX + 16] = {0};
-    snprintf(installed_package_path,
-             sizeof(installed_package_path),
-             "%s%s.json",
-             INSTALLED_DIR, package_name);
-
-    struct stat st;
-    return stat(installed_package_path, &st) == 0;
-}
-
-/*
- * Main package search routine
- *
- * Checks if a package is installed. If it isnot, validate the
- * package name via is_valid_package_name. If returns 1, proceeds to
- * search for 'PACKAGES_JSON/package_name.json'. If the manifest
- * exists, reads the fields 'description' and 'version' fields and
- * display then.
-*/
-
-int package_search(char *package_name)
+int package_search(const char *package_name)
 {
     if (!is_valid_package_name(package_name))
     {
@@ -68,32 +21,85 @@ int package_search(char *package_name)
         return 1;
     }
 
-    char package_path[NPKG_PATH_MAX + 16] = {0};
-    snprintf(package_path, sizeof(package_path), "%s%s.json", PACKAGES_JSON, package_name);
+    char installed_package_path[NPKG_PATH_MAX + 16] = {0};
+    snprintf(installed_package_path, sizeof(installed_package_path), "%s%s.json", PACKAGES_JSON, package_name);
 
     struct stat st;
-    if (stat(package_path, &st) != 0)
+    if (stat(installed_package_path, &st) != 0)
     {
         ERR("package '%s' not found in %s\n", package_name, PACKAGES_JSON);
         return 1;
     }
 
-    int package_installed = is_installed(package_name);
+    char user_destdir_buf[NPKG_PATH_MAX] = {0};
+    int have_user_destdir = 0;
+    {
+        const char *ud = getenv("DESTDIR");
+        if (ud && ud[0] != '\0')
+        {
+            snprintf(user_destdir_buf, sizeof(user_destdir_buf), "%s", ud);
+            have_user_destdir = 1;
+        }
+    }
+
+    if (manifest_set_final_root(have_user_destdir ? user_destdir_buf : NULL) != 0)
+    {
+        ERR("failed to set final root\n");
+        return 1;
+    }
+
+    if (have_user_destdir)
+    {
+        STATUS("using DESTDIR='%s' as the search root\n", manifest_get_final_root());
+    }
+
+    char package_path[NPKG_PATH_MAX] = {0};
+    const char *root = manifest_get_final_root();
+
+    snprintf(
+        package_path,
+        sizeof(package_path),
+        "%s%s%s.json",
+        root,
+        root[strlen(root) - 1] == '/'
+            ? PACKAGES_JSON + 1
+            : PACKAGES_JSON,
+        package_name
+    );
 
     FILE *package_file = fopen(package_path, "r");
     if (!package_file)
     {
-        ERR("failed to open %s\n", package_path);
+        ERR("failed to open %s: %s\n", package_path, strerror(errno));
         return 1;
     }
 
-    fseek(package_file, 0, SEEK_END);
+    if (!fd_is_trusted_root_file(fileno(package_file)))
+    {
+        ERR("refusing to use %s: must be owned by root and not writable by group/other\n", package_path);
+        fclose(package_file);
+        return 1;
+    }
+
+    if (fseek(package_file, 0, SEEK_END) != 0)
+    {
+        ERR("failed to seek %s: %s\n", package_path, strerror(errno));
+        fclose(package_file);
+        return 1;
+    }
+
     long size = ftell(package_file);
-    fseek(package_file, 0, SEEK_SET);
 
     if (size < 0)
     {
-        ERR("failed to determine size of %s\n", package_name);
+        ERR("failed to determine size of %s: %s\n", package_path, strerror(errno));
+        fclose(package_file);
+        return 1;
+    }
+
+    if (fseek(package_file, 0, SEEK_SET) != 0)
+    {
+        ERR("failed to seek %s: %s\n", package_path, strerror(errno));
         fclose(package_file);
         return 1;
     }
@@ -107,11 +113,19 @@ int package_search(char *package_name)
         return 1;
     }
 
-    fread(buffer, 1, size, package_file);
+    size_t nread = fread(buffer, 1, (size_t)size, package_file);
+    fclose(package_file);
+
+    if (nread != (size_t)size)
+    {
+        ERR("failed to read %s (short read)\n", package_path);
+        free(buffer);
+        return 1;
+    }
+
     buffer[size] = '\0';
 
     cJSON *package_json = cJSON_Parse(buffer);
-
     free(buffer);
 
     if (!package_json)
@@ -119,6 +133,11 @@ int package_search(char *package_name)
         ERR("failed to parse package.json!\n");
         return 1;
     }
+
+    int package_installed = 0;
+
+    if (is_installed(package_name))
+        package_installed = 1;
 
     cJSON *description = cJSON_GetObjectItem(package_json, "description");
     cJSON *version     = cJSON_GetObjectItem(package_json, "version");

@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <dirent.h>
-#include <errno.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "config.h"
 
 #include "common/log.h"
+#include "common/paths.h"
+#include "common/proc.h"
 
-int reset_database(void)
+int clear_cache(void)
 {
     if (geteuid() != 0)
     {
@@ -20,7 +22,7 @@ int reset_database(void)
     {
         char input[64] = {0};
 
-        STATUS("You are about to delete EVERY <package>.json on %s. Are you sure? [y/N] ", PACKAGES_JSON);
+        STATUS("You are about to delete EVERY directory on %s. Are you sure? [y/N] ", BUILD_DIR);
 
         if (!fgets(input, sizeof(input), stdin))
         {
@@ -41,13 +43,14 @@ int reset_database(void)
         }
     }
 
-    DIR *dir = opendir(PACKAGES_JSON);
+    DIR *dir = opendir(BUILD_DIR);
 
     if (!dir)
     {
-        ERR("failed to open %s: %s\n", PACKAGES_JSON, strerror(errno));
+        ERR("failed to open %s: %s\n", BUILD_DIR, strerror(errno));
         return 1;
     }
+
     struct dirent *entry;
 
     while ((entry = readdir(dir)) != NULL)
@@ -56,17 +59,23 @@ int reset_database(void)
             strcmp(entry->d_name, "..") == 0)
             continue;
 
-        char file[512];
+        char file[NPKG_PATH_MAX] = {0};
 
-        snprintf(
-            file,
+        int size = snprintf(file,
             sizeof(file),
             "%s%s",
-            PACKAGES_JSON,
+            BUILD_DIR,
             entry->d_name
         );
 
-        if (unlink(file) != 0)
+        if (size < 0 || (size_t)size >= sizeof(file))
+        {
+            ERR("path too long: %s%s\n", BUILD_DIR, entry->d_name);
+            closedir(dir);
+            return 1;
+        }
+
+        if (remove_dir(file) != 0)
         {
             ERR("failed to remove %s\n", file);
             closedir(dir);

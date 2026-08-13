@@ -7,108 +7,36 @@
  * the live filesystem and recording a manifest under INSTALLED_DIR.
 */
 
+#define _GNU_SOURCE
+
+#include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include <cjson/cJSON.h>
 
+#include "common/env.h"
+#include "common/lock.h"
+#include "common/log.h"
+#include "common/manifest.h"
+#include "common/paths.h"
+#include "common/proc.h"
+#include "common/validate.h"
 #include "config.h"
 
-#define COMMAND_MAX     1024
-#define NPKG_PATH_MAX   1024   /* avoid clashing with <limits.h> */
-#define NPKG_PATH_SLACK 32
 #define MAX_CHAIN_DEPTH 32
-
-#define MAX_CHAIN_DEPTH 32
-
-static char g_final_root[NPKG_PATH_MAX] = "/";
-
-#define ERR(...) fprintf(stderr, "npkg: " __VA_ARGS__)
-#define STATUS(...) printf("=> " __VA_ARGS__)
-
-/*
- * Run argv[0] with the given commands (without shell).
- * Returns the child's error code, or -1 on failures/child
- * was killed by a signal.
-*/
-
-static int exec_argv(char *const *argv)
-{
-    pid_t pid = fork();
-    if (pid < 0)
-    {
-        ERR("failed to fork: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if (pid == 0)
-    {
-        execvp(argv[0], argv);
-        /* only reached if execvp fails */
-        ERR("failed to exec '%s': %s\n", argv[0], strerror(errno));
-        _exit(127);
-    }
-
-    int status = 0;
-    if (waitpid(pid, &status, 0) < 0)
-    {
-        ERR("failed waitpid: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if (WIFEXITED(status)) return WEXITSTATUS(status);
-
-    if (WIFSIGNALED(status))
-    {
-        ERR("'%s' killed by signal %d\n", argv[0], WTERMSIG(status));
-        return -1;
-    }
-
-    return -1;
-
-}
-
-/*
- * Mount the path INSTALLED_DIR inside the final root(g_final_root),
- * so the builds with differents DESTDIR have they own manifests
- * instead using the host one
-*/
-
-static void installed_dir_path(char *out, size_t out_size)
-{
-    if (strcmp(g_final_root, "/") == 0)
-    {
-        snprintf(out, out_size, "%s", INSTALLED_DIR);
-    }
-    else
-    {
-        snprintf(out, out_size, "%s%s", g_final_root, INSTALLED_DIR);
-    }
-}
-
-/* Recursively remove 'path' (equivalent to 'rm -rf path', shell-free). */
-
-static int remove_dir(const char *path)
-{
-    char *argv[] = { "rm", "-rf", (char *)path, NULL };
-    return exec_argv(argv) == 0 ? 0 : 1;
-}
-
-/* Builds the absolute path to the package build directory.  */
 
 static void package_build_dir_path(char *out, size_t out_size, const char *package_name)
 {
     snprintf(out, out_size, "%s%s/", BUILD_DIR, package_name);
 }
-
-/* Recursively copy 'src' into 'dst' (equivalent to 'cp -a src dst', shell-free).  */
-
-/* Equivalent to 'mkdir -p PATH' */
 
 static int remove_path(const char *package_name)
 {
@@ -116,34 +44,6 @@ static int remove_path(const char *package_name)
     snprintf(path, sizeof(path), "%s%s", BUILD_DIR, package_name);
     return remove_dir(path);
 }
-
-static int mkdir_p(const char* path)
-{
-    char tmp[NPKG_PATH_MAX] = {0};
-    snprintf(tmp, sizeof(tmp), "%s", path);
-
-    size_t len = strlen(tmp);
-    if (len > 0 && tmp[len - 1] == '/')
-        tmp[len - 1] = '\0';
-
-    for (char *p = tmp + 1; *p; p++)
-    {
-        if (*p == '/')
-        {
-            *p = '\0';
-            if (mkdir(tmp, 0755) != 0 && errno != EEXIST) return 1;
-            *p = '/';
-        }
-    }
-
-    return (mkdir(tmp, 0755) != 0 && errno != EEXIST) ? 1 : 0;
-}
-
-/* 
- * Before copying the stage tree to the live filesystem, walk
- * over every file under 'stage_dir' and, for any path which
- * differs from what is already on the disk, remove the entry
-*/
 
 /*
  * Before copying the stage tree onto the live filesystem, walk every
@@ -153,10 +53,12 @@ static int mkdir_p(const char* path)
  * overwrite a directory with a symlink (or vice versa).
 */
 
+/* Builds the absolute path to the package build directory.  */
+
 static int reconcile_types(const char *stage_dir)
 {
     int pipefd[2] = {0};
-    if (pipe(pipefd) != 0)
+    if (pipe2(pipefd, O_CLOEXEC) != 0)
     {
         ERR("failed to create pipe for 'find': %s\n", strerror(errno));
         return 1;
@@ -188,7 +90,7 @@ static int reconcile_types(const char *stage_dir)
     FILE *entries = fdopen(pipefd[0], "r");
     if (!entries)
     {
-        ERR("failed to read output of 'find': %s\n", strerror(errno));
+        ERR("failed t:o read output of 'find': %s\n", strerror(errno));
         close(pipefd[0]);
         waitpid(pid, NULL, 0);
         return 1;
@@ -221,6 +123,18 @@ static int reconcile_types(const char *stage_dir)
 
         if (stage_is_dir != dest_is_dir || stage_is_lnk != dest_is_lnk)
         {
+            int depth = 0;
+            for (const char *c = dest_path; *c; c++)
+                if (*c == '/') depth++;
+
+            if (depth <= 1 && getenv("NPKG_ALLOW_UNSAFE_RECONCILE") == NULL)
+            {
+                ERR("refusing to remove top-level path %s due to a type conflict (set NPKG_ALLOW_UNSAFE_RECONCILE=1 to override)\n",
+                    dest_path);
+                had_error = 1;
+                break;
+            }
+
             STATUS("resolving type conflict at %s...\n", dest_path);
             if (remove_dir(dest_path) != 0)
             {
@@ -237,12 +151,6 @@ static int reconcile_types(const char *stage_dir)
     return had_error;
 }
 
-static int copy_tree(const char *src, const char *dst)
-{
-    char *argv[] = { "cp", "-a", "--remove-destination", (char *)src, (char *)dst, NULL };
-    return exec_argv(argv) == 0 ? 0 : 1;
-}
-
 /*
  * List every singular file into 'stage_dir' (equivalent to
  * 'find stage_dir -type -f'), returned as a cJSON array.
@@ -253,7 +161,7 @@ static cJSON *collect_installed_files(char *stage_dir)
     cJSON *files = cJSON_CreateArray();
 
     int pipefd[2] = {0};
-    if (pipe(pipefd) != 0)
+    if (pipe2(pipefd, O_CLOEXEC) != 0)
     {
         ERR("failed to create pipe for 'find': %s\n", strerror(errno));
         return files;
@@ -275,7 +183,7 @@ static cJSON *collect_installed_files(char *stage_dir)
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
 
-        char *argv[] = { "find", stage_dir, "-type", "f", NULL };
+        char *argv[] = { "find", stage_dir, "(", "-type", "f", "-o", "-type", "l", ")", NULL };
         execvp("find", argv);
         _exit(127);
     }
@@ -291,12 +199,14 @@ static cJSON *collect_installed_files(char *stage_dir)
         return files;
     }
 
-    char line[512] = {0};
+    size_t stage_len = strlen(stage_dir);
+    char line[NPKG_PATH_MAX] = {0};
+
     while (fgets(line, sizeof(line), commands))
     {
         line[strcspn(line, "\n")] = '\0';
-        if (strlen(line) >= strlen(stage_dir))
-            cJSON_AddItemToArray(files, cJSON_CreateString(line + strlen(stage_dir)));
+        if (strlen(line) >= stage_len)
+            cJSON_AddItemToArray(files, cJSON_CreateString(line + stage_len));
     }
 
     fclose(commands);
@@ -323,10 +233,29 @@ static int run_commands(cJSON *array)
     {
         const char *exec = cJSON_GetStringValue(command);
 
+        if (!exec)
+        {
+            ERR("invalid command entry in package definition\n");
+            return 1;
+        }
+
         int status = system(exec);
 
-        if (status != 0) {
-            ERR("command failed (exit %d): %s\n", status, exec);
+        if (status == -1) {
+            ERR("failed to execute command: %s (%s)\n", exec, strerror(errno));
+            return 1;
+        }
+
+        if (WIFSIGNALED(status))
+        {
+            ERR("command killed by signal %d: %s\n", WTERMSIG(status), exec);
+            return 1;
+        }
+
+        if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+        {
+            int rc = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+            ERR("command failed (exit %d): %s\n", rc, exec);
             return 1;
         }
     }
@@ -334,64 +263,23 @@ static int run_commands(cJSON *array)
     return 0;
 }
 
-/* Return 1 if 'package_name' has a manifest under MANIFEST_DIR, 0 otherwise  */
-
-static int is_installed(char *package_name)
+static int run_step(cJSON *package_json, const char *key)
 {
-    char installed_dir[NPKG_PATH_MAX] = {0};
-    installed_dir_path(installed_dir, sizeof(installed_dir));
+    cJSON *item = cJSON_GetObjectItem(package_json, key);
 
-    char installed_package_path[NPKG_PATH_MAX + 16] = {0};
-    snprintf(installed_package_path,
-             sizeof(installed_package_path),
-             "%s%s.json",
-             installed_dir, package_name);
-
-    struct stat st;
-    return stat(installed_package_path, &st) == 0;
-}
-
-/* Write INSTALLED_DIR/<package_name>.json containing the package_name,
- * version and installed packages. Writes it to a .tmp file first so a
- * crash mid-write cant corrupt an existing manifest.
-*/
-
-int write_manifest(char *package_name, char *version, cJSON *files)
-{
-    cJSON *manifest = cJSON_CreateObject();
-    cJSON_AddStringToObject(manifest, "name", package_name);
-    cJSON_AddStringToObject(manifest, "version", version ? version : "unknown");
-    cJSON_AddItemToObject(manifest, "files", files);
-
-    char installed_dir[NPKG_PATH_MAX] = {0};
-    installed_dir_path(installed_dir, sizeof(installed_dir));
-
-    /* garante que o diretório de manifestos existe dentro da raiz final */
-    mkdir_p(installed_dir);
-
-    char manifest_path[NPKG_PATH_MAX + 16] = {0};
-    snprintf(manifest_path, sizeof(manifest_path), "%s%s.json", installed_dir, package_name);
-
-    char tmp_path[sizeof(manifest_path) + 16] = {0};
-    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", manifest_path);
-
-    FILE *manifest_file = fopen(tmp_path, "w");
-    if (!manifest_file)
+    if (!item)
     {
-        ERR("failed to write manifest for '%s': %s\n", package_name, strerror(errno));
-        cJSON_Delete(manifest);
+        STATUS("no '%s' steps defined for this package\n", key);
+        return 0;
+    }
+
+    if (!cJSON_IsArray(item))
+    {
+        ERR("'%s' field must be a JSON array in the package definition\n", key);
         return 1;
     }
 
-    char *json_str = cJSON_Print(manifest);
-    fputs(json_str, manifest_file);
-    fclose(manifest_file);
-    free(json_str);
-    cJSON_Delete(manifest);
-    if (rename(tmp_path, manifest_path) != 0)
-        ERR("failed to finalize manifest for '%s': %s\n", package_name, strerror(errno));
-
-    return 0;
+    return run_commands(item);
 }
 
 /*
@@ -399,27 +287,34 @@ int write_manifest(char *package_name, char *version, cJSON *files)
 */
 
 
-static int install_recursive(char *package_name, char **chain, int depth);
+static int install_recursive(const char *package_name, const char **chain, int depth);
 
 /* Return 1 if 'package_name' already appears in the curretn dependency chain */
 
-int in_chain(char **chain, int depth, char *package_name)
+static int in_chain(const char **chain, int depth, const char *package_name)
 {
     for (int i = 0; i < depth; i++)
     {
-        if (strcmp(chain[i], package_name) == 0) return 1;
+        if (strcmp(chain[i], package_name) == 0)
+            return 1;
     }
 
     return 0;
 }
 
-int install_dependencies(cJSON *dependencies, char **chain, int depth)
+static int install_dependencies(cJSON *dependencies, const char **chain, int depth)
 {
     cJSON *dependency = {0};
 
     cJSON_ArrayForEach(dependency, dependencies)
     {
         char *dep_name = cJSON_GetStringValue(dependency);
+
+        if (!dep_name || !is_valid_package_name(dep_name))
+        {
+            ERR("invalid dependency name in package definition\n");
+            return 1;
+        }
 
         if (is_installed(dep_name))
         {
@@ -438,6 +333,17 @@ int install_dependencies(cJSON *dependencies, char **chain, int depth)
     return 0;
 }
 
+/* Restore the working directory saved before entering a package's
+ * build.
+*/
+
+static void restore_cwd(const char *original_cwd)
+{
+    if (chdir(original_cwd) != 0)
+        ERR("failed to restore working directory to %s: %s\n", original_cwd, strerror(errno));
+}
+
+
 /*
  * Main install pipeline.
  *
@@ -448,8 +354,13 @@ int install_dependencies(cJSON *dependencies, char **chain, int depth)
  * the current position on it.
 */
 
-static int install_recursive(char *package_name, char **chain, int depth)
+static int install_recursive(const char *package_name, const char **chain, int depth)
 {
+    if (!is_valid_package_name(package_name))
+    {
+        ERR("invalid package name '%s'\n", package_name ? package_name : "(null)");
+        return 1;
+    }
 
     if (depth >= MAX_CHAIN_DEPTH)
     {
@@ -498,9 +409,34 @@ static int install_recursive(char *package_name, char **chain, int depth)
         return 1;
     }
 
-    fseek(package_file, 0, SEEK_END);
+    if (!fd_is_trusted_root_file(fileno(package_file)))
+    {
+        ERR("refusing to use package definition %s: must be owned by root and not writable by group/other\n", package_path);
+        fclose(package_file);
+        return 1;
+    }
+
+    if (fseek(package_file, 0, SEEK_END) != 0)
+    {
+        ERR("failed to seek %s: %s\n", package_path, strerror(errno));
+        fclose(package_file);
+        return 1;
+    }
     long size = ftell(package_file);
-    fseek(package_file, 0, SEEK_SET);
+
+    if (size < 0)
+    {
+        ERR("failed to determine size of %s: %s\n", package_path, strerror(errno));
+        fclose(package_file);
+        return 1;
+    }
+
+    if (fseek(package_file, 0, SEEK_SET) != 0)
+    {
+        ERR("failed to seek %s: %s\n", package_path, strerror(errno));
+        fclose(package_file);
+        return 1;
+    }
 
     if (size < 0)
     {
@@ -517,9 +453,17 @@ static int install_recursive(char *package_name, char **chain, int depth)
         return 1;
     }
 
-    fread(raw, 1, size, package_file);
-    raw[size] = '\0';
+    size_t nread = fread(raw, 1, size, package_file);
     fclose(package_file);
+
+    if (nread != (size_t)size)
+    {
+        ERR("failed to read %s\n", package_path);
+        free(raw);
+        return 1;
+    }
+
+    raw[size] = '\0';
 
     cJSON *package_json = cJSON_Parse(raw);
     free(raw);
@@ -545,7 +489,12 @@ static int install_recursive(char *package_name, char **chain, int depth)
 
     /* Remove possible leftovers */
 
-    remove_path(package_name);
+    if (remove_path(package_name) != 0)
+    {
+        ERR("failed to clean up leftovers for %s\n", package_name);
+        cJSON_Delete(package_json);
+        return 1;
+    }
 
     if (mkdir_p(package_build_dir) != 0)
     {
@@ -565,20 +514,19 @@ static int install_recursive(char *package_name, char **chain, int depth)
 
     STATUS("downloading %s...\n", package_name);
 
-    if (run_commands(cJSON_GetObjectItem(package_json, "download")) != 0)
+    if (run_step(package_json, "download") != 0)
     {
         cJSON_Delete(package_json);
-        chdir(original_cwd);
+        restore_cwd(original_cwd);
         return 1;
     }
 
     STATUS("building %s...\n", package_name);
 
-
-    if (run_commands(cJSON_GetObjectItem(package_json, "build")) != 0)
+    if (run_step(package_json, "build") != 0)
     {
         cJSON_Delete(package_json);
-        chdir(original_cwd);
+        restore_cwd(original_cwd);
         return 1;
     }
 
@@ -590,17 +538,17 @@ static int install_recursive(char *package_name, char **chain, int depth)
     {
         ERR("failed to create %s\n", stage_dir);
         cJSON_Delete(package_json);
-        chdir(original_cwd);
+        restore_cwd(original_cwd);
         return 1;
     }
     setenv("DESTDIR", stage_dir, 1);
 
     STATUS("installing %s...\n", package_name);
 
-    if (run_commands(cJSON_GetObjectItem(package_json, "install")) != 0)
+    if (run_step(package_json, "install") != 0)
     {
         cJSON_Delete(package_json);
-        chdir(original_cwd);
+        restore_cwd(original_cwd);
         return 1;
     }
 
@@ -617,25 +565,27 @@ static int install_recursive(char *package_name, char **chain, int depth)
         ERR("failed to reconcile file types for %s\n", package_name);
         cJSON_Delete(installed_files);
         cJSON_Delete(package_json);
-        chdir(original_cwd);
+        restore_cwd(original_cwd);
         return 1;
     }
 
-    STATUS("installing files to %s ...\n", g_final_root);
+    const char *final_root = manifest_get_final_root();
+
+    STATUS("installing files to %s ...\n", final_root);
 
     char stage_src[sizeof(stage_dir) + NPKG_PATH_SLACK] = {0};
     snprintf(stage_src, sizeof(stage_src), "%s/.", stage_dir);
 
-    if (mkdir_p(g_final_root) != 0)
+    if (mkdir_p(final_root) != 0)
     {
-        ERR("failed to create final root %s\n", g_final_root);
+        ERR("failed to create final root %s\n", final_root);
         cJSON_Delete(installed_files);
         cJSON_Delete(package_json);
         chdir(original_cwd);
         return 1;
     }
 
-    if (copy_tree(stage_src, g_final_root) != 0)
+    if (copy_tree(stage_src, final_root) != 0)
     {
         ERR("failed to copy staged files for %s\n", package_name);
         cJSON_Delete(installed_files);
@@ -647,11 +597,18 @@ static int install_recursive(char *package_name, char **chain, int depth)
     STATUS("writing manifest...\n");
 
     char *version = cJSON_GetStringValue(cJSON_GetObjectItem(package_json, "version"));
-    write_manifest(package_name, version, installed_files);
+    if (write_manifest(package_name, version, installed_files) != 0)
+    {
+        ERR("'%s' files were installed but the manifest could not be written, the package will NOT be tracked correctly\n", package_name);
+        cJSON_Delete(package_json);
+        chdir(original_cwd);
+        return 1;
+    }
 
     STATUS("cleaning up...\n");
 
-    remove_dir(stage_dir);
+    if (remove_dir(stage_dir) != 0)
+        ERR("failed to remove stagging directory");
 
     cJSON_Delete(package_json);
     chdir(original_cwd);
@@ -661,105 +618,75 @@ static int install_recursive(char *package_name, char **chain, int depth)
     return 0;
 }
 
-/*
- * make.conf parsing.
- *
- * Parse KEY=VALUE lines from 'make_conf_path' (blank lines and lines
- * starting with '#' are skipped and apply via setenv(). Because the
- * variables are set on this process). they remain visible for every
- * system() call made later.
-*/
+/* Entry */
 
-static int set_env(char *make_conf_path)
-{
-    FILE *f_make_conf = fopen(make_conf_path, "r");
-    if (!f_make_conf)
-    {
-        ERR("failed to read %s\n", make_conf_path);
-        return 1;
-    }
-
-    char line[1024] = {0};
-
-    while (fgets(line, sizeof(line), f_make_conf) != NULL)
-    {
-        line[strcspn(line, "\n")] = '\0';
-
-        if (line[0] == '#' || line[0] == '\0') continue;
-
-        char *eq = strchr(line, '=');
-
-        if (!eq) continue;
-
-        *eq = '\0';
-
-        char *key = line;
-        char *value = eq + 1;
-
-        if (key[0] == '\0')
-        {
-            ERR("invalid assigment (empty key) in %s\n", make_conf_path);
-
-            continue;
-        }
-
-        if (value[0] == '"' && value[strlen(value) - 1] == '"')
-        {
-            value++;
-            value[strlen(value) - 1] = '\0';
-        }
-
-        if (setenv(key, value, 1) == -1)
-        {
-            ERR("failed to set %s\n", key);
-            fclose(f_make_conf);
-            return 1;
-        }
-    }
-
-    fclose(f_make_conf);
-
-    return 0;
-}
-
-int package_install(char *package_name)
+int package_install(const char *package_name)
 {
     if (geteuid() != 0)
     {
         ERR("this command must be run as root\n");
         return 1;
     }
-    char *user_destdir = getenv("DESTDIR");
-    if (user_destdir && user_destdir[0] != '\0')
+
+    if (!is_valid_package_name(package_name))
     {
-        snprintf(g_final_root, sizeof(g_final_root), "%s", user_destdir);
-        size_t len = strlen(g_final_root);
-        if (len > 0 && g_final_root[len - 1] != '/')
+        ERR("invalid package name '%s'\n", package_name ? package_name : "(null)");
+        return 1;
+    }
+
+    char user_destdir_buf[NPKG_PATH_MAX] = {0};
+    int have_user_destdir = 0;
+    {
+        const char *ud = getenv("DESTDIR");
+        if (ud && ud[0] != '\0')
         {
-            if (len + 1 < sizeof(g_final_root))
-            {
-                g_final_root[len] = '/';
-                g_final_root[len + 1] = '\0';
-            }
-            else
-            {
-                ERR("DESTDIR too long, truncated: %s\n", g_final_root);
-            }
+            snprintf(user_destdir_buf, sizeof(user_destdir_buf), "%s", ud);
+            have_user_destdir = 1;
         }
-        unsetenv("DESTDIR");
-        STATUS("using DESTDIR='%s' as final install root\n", g_final_root);
     }
-    else
+
+    if (sanitize_environment() != 0)
     {
-        snprintf(g_final_root, sizeof(g_final_root), "/");
+        ERR("failed to sanitize environment\n");
+        return 1;
     }
+
+    if (acquire_lock() != 0) return 1;
+
+    int rc = 0;
+
+    if (manifest_set_final_root(have_user_destdir ? user_destdir_buf : NULL) != 0)
+    {
+        ERR("failed to set final root\n");
+        rc = 1;
+        goto out;
+    }
+
+    if (have_user_destdir)
+    {
+        STATUS("using DESTDIR='%s' as the final install root\n", manifest_get_final_root());
+    }
+
     struct stat st;
     if (stat(MAKE_CONF, &st) == 0)
     {
-        if (set_env(MAKE_CONF) != 0) 
-            ERR("failed to set make.conf");
+        if (set_env(MAKE_CONF) != 0)
+        {
+            ERR("failed to set make.conf\n");
+            rc = 1;
+            goto out;
+        }
     }
-    char *chain[MAX_CHAIN_DEPTH] = {0};
 
-    return install_recursive(package_name, chain, 0);
+    const char *chain[MAX_CHAIN_DEPTH] = {0};
+    rc = install_recursive(package_name, chain, 0);
+
+out:
+    if (have_user_destdir)
+        setenv("DESTDIR", user_destdir_buf, 1);
+    else
+        unsetenv("DESTDIR");
+
+    release_lock();
+    return rc;
 }

@@ -14,15 +14,17 @@ NPKG_INSTALLED = /var/lib/npkg/installed
 NPKG_BUILD     = /var/cache/npkg/build
 MAKE_CONF      = /etc/npkg/make.conf
 
+SRCS = $(wildcard src/*.c src/common/*.c)
+
 .PHONY: all debug clean install uninstall
 
 all: $(TARGET)
 
 $(TARGET):
-	$(CC) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(SRCS) -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
 
 debug:
-	$(CC) $(DEBUGFLAGS) $(CFLAGS) src/*.c -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
+	$(CC) $(DEBUGFLAGS) $(CFLAGS) $(SRCS) -Iinclude -Iconfig -o $(TARGET) $(LDFLAGS)
 
 
 clean:
