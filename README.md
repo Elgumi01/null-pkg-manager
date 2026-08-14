@@ -72,7 +72,6 @@ Clone the `null-package-manager` repository:
 
 ```bash
 git clone https://github.com/Elgumi01/null-package-manager.git
-cd null-package-manager
 ```
 
 Clone the official `null-packages` repository:
