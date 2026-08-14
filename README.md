@@ -68,16 +68,31 @@ by some of the packages available in the `packages/` directory.
 
 ## Installation
 
-Clone the repository:
+Clone the `null-package-manager` repository:
 
 ```bash
 git clone https://github.com/Elgumi01/null-package-manager.git
 cd null-package-manager
 ```
 
+Clone the official `null-packages` repository:
+
+```bash
+git clone https://github.com/Elgumi01/null-packages.git
+```
+
+Copy the package recipes into the `npkg` package directory:
+
+```bash
+sudo cp -r null-packages/packages/* /etc/npkg/packages/
+```
+
+This will make all packages from `null-packages` available to `npkg`.
+
 Build:
 
 ```bash
+cd null-package-manager/
 make
 ```
 
@@ -86,7 +101,6 @@ Install:
 ```bash
 sudo make install
 ```
-
 You can then check that `npkg` is working:
 
 ```bash

@@ -8,7 +8,7 @@
 #include "reset_db.h"
 #include "clear_cache.h"
 
-#define VERSION 1.0
+#define VERSION 1.1
 
 void print_help(void)
 {
