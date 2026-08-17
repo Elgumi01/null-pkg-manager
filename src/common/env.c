@@ -37,7 +37,7 @@ static const char *DANGEROUS_ENV_VARS[] = {
 
 static const char *ALLOWED_MAKE_CONF_KEYS[] = {
     "MAKEOPTS", "CFLAGS", "CXXFLAGS", "PREFIX",
-    "XORG_PREFIX", "XORG_CONFIG", "CC",
+    "XORG_PREFIX", "XORG_CONFIG", "CC", "LDFLAGS",
     NULL
 };
 
