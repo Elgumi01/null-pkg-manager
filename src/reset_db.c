@@ -21,7 +21,7 @@ int reset_database(void)
         char input[64] = {0};
 
         STATUS("You are about to delete EVERY <package>.json on %s. Are you sure? [y/N] ", PACKAGES_JSON);
-
+        fflush(stdout);
         if (!fgets(input, sizeof(input), stdin))
         {
             ERR("failed to read input\n");

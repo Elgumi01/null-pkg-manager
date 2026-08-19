@@ -23,7 +23,7 @@ int clear_cache(void)
         char input[64] = {0};
 
         STATUS("You are about to delete EVERY directory on %s. Are you sure? [y/N] ", BUILD_DIR);
-
+        fflush(stdout);
         if (!fgets(input, sizeof(input), stdin))
         {
             ERR("failed to read input\n");
